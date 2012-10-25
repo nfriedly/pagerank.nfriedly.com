@@ -7,6 +7,7 @@ app.configure(function() {
 	app.use(express.static(__dirname + '/public'));
 	app.set('views', __dirname + '/views');
 	app.set('view engine', 'jade');
+	app.use(require('less-middleware')({ src: __dirname + '/public' }));
 });
 
 app.configure('production', function() {

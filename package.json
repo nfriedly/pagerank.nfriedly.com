@@ -5,7 +5,8 @@
 	"dependencies": {
 		"express": "3.x",
 		"pagerank": "1.x.x",
-		"jade": "0.27.x"
+		"jade": "0.27.x",
+		"less-middleware:: "0.1.x"
 	},
 	"engines": {
 		"node": "0.8.x",
