@@ -30,12 +30,7 @@ app.get('/pagerank', function(req, res) {
 		res.redirect('/');
 	}
 	var url = decodeURIComponent(req.query.url);
-	
-	// override the Accept header with the query param if one is set
-	if (req.query.format) {
-		req.accepted = [format];
-	}
-	
+
 	new PageRank(url, function(err, pr) {
 		var text_pr = (pr === null) ? 'unknown' : pr.toString();
 		var data = {pagerank: pr, url: url};
@@ -46,10 +41,10 @@ app.get('/pagerank', function(req, res) {
 			data = data.error = err;
 			console.log('Error looking up pagerank', err);
 		}
-	
-		res.format({
+		
+		var formats = {
 			text: function(){
-				res.send(text_pr);
+				res.type('.txt').send(text_pr);
 			},
 			html: function(){
 				res.render('pagerank', data);
@@ -58,14 +53,20 @@ app.get('/pagerank', function(req, res) {
 				res.jsonp(data);
 			},
 			js: function(){
-				res.render(util.format(
-					'alert("Pagerank of %s\n\n%s\n\nProvided by%s");',
+				res.type('.js').send(util.format(
+					'alert("Pagerank of %s\\n\\n%s\\n\\nProvided by %s");',
 					url,
 					text_pr,
-					req.hostname
+					req.host
 				));
 			}
-		});
+		};
+		
+		if (formats[req.query.format]) {
+			formats[req.query.format]();
+		} else {
+			res.format(formats);
+		}
 	});
 });
 
