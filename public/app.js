@@ -54,7 +54,8 @@ var PageRankView = Backbone.View.extend({
     	this.listenTo(this.model, "flash", this.flash);
 	},
 	
-	template: _.template('<%= pagerank %> - <a href="<%= url %>"><%= url %></a>'),
+	template: _.template('<div class="prbar"><div class="prbar-inner" style="width: <%= (+pagerank || 0)  * 10 %>%"></div></div>'
+		+ ' - <%= pagerank %> - <a href="<%= url %>"><%= url %></a>'),
 	
 	render: function() {
 		var pr = this.model.get('pagerank');
@@ -97,7 +98,7 @@ var ResultsList = Backbone.View.extend({
 	
 	show: function() {
 		if(!this.visible) {
-			this.$el.show('slow');
+			this.$el.show('fast');
     		this.visible = true;
 		}
 	},
