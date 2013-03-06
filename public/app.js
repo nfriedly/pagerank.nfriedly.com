@@ -33,6 +33,7 @@ var PageRank = Backbone.Model.extend({
 	parse: function(response) {
 		// response is already parsed to JSON by jQuery because of the content-type headers
 		if (response.error) {
+			this.trigger('error', response);
 			throw response;
 		}
 		response.id = this.normalize(response.url);
@@ -112,6 +113,10 @@ var ResultsList = Backbone.View.extend({
 	list: null,
 	visible: false,
 	
+	events: {
+		"click a.close": "hideError"
+	},
+	
 	initialize: function() {
     	this.list = this.$('ul');
     	
@@ -120,6 +125,9 @@ var ResultsList = Backbone.View.extend({
     	if (this.collection.models.length) {
     		this.collection.each(this.addOne, this);
     	}
+    	
+    	this.errContainer = this.$('.alert-error');
+    	this.errBody = this.$('.alert-error p');
 	},
 	
 	show: function() {
@@ -133,6 +141,15 @@ var ResultsList = Backbone.View.extend({
 		this.show();
     	var view = new PageRankView({model: pr});
     	this.list.append(view.render().el);
+	},
+	
+	hideError: function() {
+		this.errContainer.hide('slow');
+	},
+	
+	error: function(data) {
+		this.errContainer.show('slow');
+		this.errBody.text(data && data.error || "Unknown Error");
 	}
 });
 
@@ -151,6 +168,7 @@ var FormView = Backbone.View.extend({
 	lookup: function(event) {
 		event.preventDefault();
 		var id = this.input.val();
+		if (!id) return alert('Type in a URL first!');
 		var pr = pageRanks.get(id)
 		if (pr && pr.newish()) {
 			pr.trigger('flash', 3);
