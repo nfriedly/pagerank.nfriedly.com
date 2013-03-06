@@ -1,15 +1,14 @@
 {
 	"name": "pagerank.nfriedly.com",
 	"description": "pagerank lookup app",
-	"version": "0.0.1",
+	"version": "0.2.0",
 	"dependencies": {
 		"express": "3.x",
 		"pagerank": "1.x.x",
-		"jade": "0.27.x",
-		"less-middleware:: "0.1.x"
+		"less-middleware": "0.1.x"
 	},
 	"engines": {
 		"node": "0.8.x",
-		"npm": "1.1.x"
+		"npm": "1.x"
 	}
 }
