@@ -4,8 +4,8 @@ var PageRank = Backbone.Model.extend({
 	timestamp: null,
 	
 	initialize: function(attrs, options) {
-		this.timestamp = new Date();
-		this.id = this.normalize(attrs.id);
+		this.set('timestamp', attrs.timestamp || new Date());
+		this.set('id', this.normalize(attrs.id || ""));
 	},
 	
 	normalize: function(url) {
@@ -16,6 +16,14 @@ var PageRank = Backbone.Model.extend({
 			url = "http://" + url;
 		}
 		return url;
+	},
+	
+	newish: function() {
+		return (this.age() <= 24*60*60);
+	},
+	
+	age: function() {
+		return ( (new Date()).getTime() - this.get('timestamp').getTime() )/1000;
 	},
 	
 	url: function() {
@@ -29,6 +37,9 @@ var PageRank = Backbone.Model.extend({
 		}
 		response.id = this.normalize(response.url);
 		delete response.url;
+		if (response.timestamp && typeof response.timestamp != typeof (new Date())) {
+			response.timestamp = new Date(response.timestamp);
+		}
 		return response;
 	}
 });
@@ -36,13 +47,24 @@ var PageRank = Backbone.Model.extend({
 var PageRanks = Backbone.Collection.extend({
 	model: PageRank,
 	
+	initialize: function() {
+		//this.on("add", this.save); - only want to save when we have results back from the server
+		this.on("change", this.save);
+	},
+	
 	get: function(id) {
 		return Backbone.Collection.prototype.get.call(this, PageRank.prototype.normalize('' + id));
+	},
+	
+	save: function() {
+		if (window.localStorage) {
+			window.localStorage.pageranks = JSON.stringify(this.toJSON());
+		}
 	}
 });
 
-// todo: store results in localStorage and initialize from there
-var pageRanks = new PageRanks([]);
+var cachedResults = window.localStorage && window.localStorage.pageranks;
+var pageRanks = new PageRanks(cachedResults && JSON.parse(cachedResults) || []);
 
 var PageRankView = Backbone.View.extend({
 	tagName: 'li',
@@ -94,6 +116,10 @@ var ResultsList = Backbone.View.extend({
     	this.list = this.$('ul');
     	
     	this.listenTo(this.collection, 'add', this.addOne);
+    	
+    	if (this.collection.models.length) {
+    		this.collection.each(this.addOne, this);
+    	}
 	},
 	
 	show: function() {
@@ -126,7 +152,7 @@ var FormView = Backbone.View.extend({
 		event.preventDefault();
 		var id = this.input.val();
 		var pr = pageRanks.get(id)
-		if (pr) {
+		if (pr && pr.newish()) {
 			pr.trigger('flash', 3);
 		} else {
 			pr = new PageRank({id: id});
