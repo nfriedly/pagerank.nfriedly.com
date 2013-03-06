@@ -5,22 +5,46 @@
   <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootswatch/2.3.0/superhero/bootstrap.min.css" type="text/css">
   <style type="text/css">
   	section {margin-top:6em}
+  	#bookmarklett {text-align: center;}
+  	input.btn-large {height:42px;}
+  	#results {display: none;}
+  	.flash {animation-name: flash; animation-duration: 1s; animation-iteration-count: infinite;}
+	@keyframes flash {
+		0% {background-color:transparent;}
+		50% {background-color: #468847;}
+		100% {background-color:transparent;}
+	}
   </style>
 </head>
 
 <body>
+<div class="navbar navbar-static-top">
+    <div class="navbar-inner">
+    	<div class="container">
+        	<a href="/" class="brand">Google PageRank Lookup Tool</a>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="container">
-    <h1>Google PageRank Lookup Tool</h1>
 
-	<section>
-		<form action="/pagerank">
-		  <input name="url">&nbsp;<input type="submit" value="Lookup" class=
-		  "btn btn-primary">
+	<section class="jumbotron">
+		<form id="lookup-form" action="/pagerank" class="form-inline">
+			<span class="btn-large">URL:</span>
+			<div class="input-append">
+			  <input type="text" id="url" name="url" class="input-xlarge btn-large span9" placeholder="http://example.com/"autofocus>
+			  <button id="lookup" class="btn btn-primary btn-large">Lookup</button>
+			</div>
 		</form>
+    </section>
+    
+    <section id="results">
+    	<h2>Results</h2>
+    	<ul></ul>
     </section>
 
     <section>
-        <div class="well span4 pull-right">
+        <div class="well span4 pull-right center" id="bookmarklett">
 		  <h2>Bookmarklett</h2>
 		  
 		  <p><a class="btn btn-large btn-info" id="bookmarklett" href="javascript:void(function(d,l,s){s=d.createElement('script');s.src='//pagerank.nfriedly.com/pagerank.js?url='+l.hostname+l.pathname;d.body.appendChild(s);}(document,window.location))">Get
@@ -51,9 +75,21 @@
   <script>
   	var bookmarklett = document.getElementById('bookmarklett');
   	bookmarklett.onclick = function() {
-  		alert('To use this bookmarklett:\n\n1) Drag the words "Get Pagerank" to your bookmarks toolbar\n2) Navigate to the page you would like to look up\n3) Click the "Get Pagerank" bookmark you created in step 1'); 
+  		alert('To use this bookmarklett:\n\n1) Drag the "Get Pagerank" button to your bookmarks toolbar\n2) Navigate to the page you would like to look up\n3) Click the "Get Pagerank" bookmark you created in step 1'); 
   		return false;
   	};
   </script>
+  <script>
+  	function addScript(src) {
+  		document.write('<script src="' + src + '"><\/script>');
+  	}
+  	if (!window.JSON) {
+  		addScript('//cdnjs.cloudflare.com/ajax/libs/json3/3.2.4/json3.min.js');
+  	}
+  </script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.10/backbone-min.js"></script>
+  <script src="/app.js"></script>
 </body>
 </html>
