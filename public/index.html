@@ -4,8 +4,6 @@
   <title>Google PageRank Lookup Tool</title>
   <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootswatch/2.3.0/superhero/bootstrap.min.css" type="text/css">
   <style type="text/css">
-  	section {margin-top:6em}
-  	#bookmarklett {text-align: center;}
   	input.btn-large {height:42px;}
   	#results {display: none;}
   	.flash {animation-name: flash; animation-duration: 1s; animation-iteration-count: infinite;}
@@ -14,6 +12,11 @@
 		50% {background-color: #468847;}
 		100% {background-color:transparent;}
 	}
+	.jumbotron {padding: 6em 0; margin:0; background-image: url("/debut_dark.png"); background-repeat: repeat; background-size: auto auto; border-bottom: 1px solid #20262D;}
+	.about {margin-top:3em; }
+	.center {text-align: center;}
+	.footer {padding:4em 0;}
+	#results ul, #results ul li {list-style-type: none; margin-left: 1px;padding-left: 0;}
   </style>
 </head>
 
@@ -26,24 +29,25 @@
       </div>
     </div>
   </div>
-  <div class="container">
 
-	<section class="jumbotron">
-		<form id="lookup-form" action="/pagerank" class="form-inline">
+	<div class="jumbotron">
+		<form id="lookup-form" action="/pagerank" class="form-inline container">
 			<span class="btn-large">URL:</span>
 			<div class="input-append">
 			  <input type="text" id="url" name="url" class="input-xlarge btn-large span9" placeholder="http://example.com/"autofocus>
 			  <button id="lookup" class="btn btn-primary btn-large">Lookup</button>
 			</div>
 		</form>
-    </section>
     
-    <section id="results">
-    	<h2>Results</h2>
-    	<ul></ul>
-    </section>
+    	<div class="container">
+			<section id="results">
+				<h2>Results</h2>
+				<ul></ul>
+			</section>
+		</div>
+	</div>
 
-    <section>
+    <section class="container about">
         <div class="well span4 pull-right center" id="bookmarklett">
 		  <h2>Bookmarklett</h2>
 		  
@@ -61,16 +65,13 @@
 
 		<p>Other metrics that search engines use in determining results include the load time of the website, the validity of the markup, and above all, the content of the website.</p>
 	</section>
-  </div>
 
-  <div class="footer">
-    <div class="container">
-		<section class="well">
-		  <p><a href="http://pagerank.nfriedly.com/">Google PageRank Lookup Tool</a> by
+
+  <footer class="container">  
+  	<hr>
+	<p><a href="http://pagerank.nfriedly.com/">Google PageRank Lookup Tool</a> by
 		  <a href="http://nfriedly.com/">Nathan Friedly</a> with <a href="http://nodejs.org">node.js</a>.</p>
-      </section>
-    </div>
-  </div>
+  </footer>
   
   <script>
   	var bookmarklett = document.getElementById('bookmarklett');
