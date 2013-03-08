@@ -1,6 +1,9 @@
 var util = require('util');
 var PageRank = require('pagerank');
 var express = require('express');
+
+var cache = require('./cache');
+
 var app = express();
 
 app.configure(function() {
@@ -14,49 +17,46 @@ app.configure('production', function() {
 });
 
 
-//var index = require('fs').readFileSync('./views/index.html').toString();
-//app.get('/', function(req, res){
-//	res.send(index);
-//});
+function sendResponse(err, res, url, pr) {
+	var data;
+	if (err) {
+		res.status(500);
+		data = {error: 'Error looking up pagerank.'};
+		console.error(data.error, url, err.message, err);
+	} else {
+		data = {pagerank: pr, url: url}
+	}
+	res.json(data);
+}
 
 function getPr(req, res, js) {
 	if (!req.query.url) {
 		res.redirect('/');
 	}
 	var url = decodeURIComponent(req.query.url);
-
-	new PageRank(url, function(err, pr) {
-		var text_pr = (pr === null) ? 'unknown' : pr.toString();
-		var data = {pagerank: pr, url: url};
-		
-		if (err) {
-			res.status(500);
-			text_pr = 'error';
-			data = data.error = err;
-			console.log('Error looking up pagerank', err);
+	
+	cache.getPr(url, function(err, pagerank) {
+		if (pagerank !== null) {
+			console.log('cache hit');
+			return sendResponse(null, res, url, pagerank);
 		}
-		if (js) {
-			res.type('.js').send(util.format(
-				'alert("Pagerank of %s\\n\\n%s\\n\\nProvided by %s");',
-				url,
-				text_pr,
-				req.host
-			));
-		} else {
-			res.json(data);
-		}
+		console.log('cache miss');
+		cache.checkIpAllowed(req.connection.remoteAddress, function (err, allowed) {
+			if (!allowed) {
+				return res.status(403).json({error: "Sorry, you've hit the rate limit. Please try again in 24 hours."});
+			}
+			
+			new PageRank(url, function(err, pr) {
+				sendResponse(err, res, url, pr);
+				cache.setPr(url, pr);
+			});
+		});
 	});
 }
 
 app.get('/pagerank', function(req, res) {
 	getPr(req, res, false);
 });
-
-// bookmarklett
-app.get('/pagerank.js', function(req, res) {
-	getPr(req, res, true);
-});
-
 
 var port = process.env.PORT || 3000;
 app.listen(port);

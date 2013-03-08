@@ -2,7 +2,6 @@ var PageRank = Backbone.Model.extend({
 	collection: PageRanks,
 	pagerank: undefined,
 	timestamp: null,
-	
 	initialize: function(attrs, options) {
 		this.set('timestamp', attrs.timestamp || new Date());
 		this.set('id', this.normalize(attrs.id || ""));
@@ -33,7 +32,7 @@ var PageRank = Backbone.Model.extend({
 	parse: function(response) {
 		// response is already parsed to JSON by jQuery because of the content-type headers
 		if (response.error) {
-			this.trigger('error', response);
+			this.trigger('error', this, response);
 			throw response;
 		}
 		response.id = this.normalize(response.url);
@@ -112,15 +111,19 @@ var ResultsList = Backbone.View.extend({
 	collection: null,
 	list: null,
 	visible: false,
+	views: null,
 	
 	events: {
 		"click a.close": "hideError"
 	},
 	
 	initialize: function() {
+		this.views = {};
     	this.list = this.$('ul');
     	
     	this.listenTo(this.collection, 'add', this.addOne);
+    	this.listenTo(this.collection, 'remove', this.removeOne);
+    	this.listenTo(this.collection, 'error', this.error);
     	
     	if (this.collection.models.length) {
     		this.collection.each(this.addOne, this);
@@ -140,16 +143,35 @@ var ResultsList = Backbone.View.extend({
 	addOne: function(pr) {
 		this.show();
     	var view = new PageRankView({model: pr});
-    	this.list.append(view.render().el);
+    	this.list.prepend(view.render().el);
+    	this.views[pr] = view;
+	},
+	
+	removeOne: function(model) {
+		this.views[model].remove();
+		delete this.views[model];
 	},
 	
 	hideError: function() {
-		this.errContainer.hide('slow');
+		this.errContainer.slideUp();
 	},
 	
-	error: function(data) {
-		this.errContainer.show('slow');
-		this.errBody.text(data && data.error || "Unknown Error");
+	error: function(model, data) {
+		var msg;
+		if (data && typeof data.error == "string") {
+			msg = data.error;
+		} else if (data.status == 403) {
+			// this is actually the text in the ajax response, but I think some browsers don't provide non-200 responses
+			msg = "Sorry, you've hit the rate limit. Please try again in 24 hours."; 
+		} else if (data.readyState) {
+			msg = "Error communicating with server, please refresh the page and try again in a few minutes";
+		}
+		this.errBody.text(msg);
+		this.errContainer.fadeIn();
+		if (window.console && window.console.error) {
+			window.console.error(msg, data, model);
+		}
+		this.collection.remove(model.id);
 	}
 });
 

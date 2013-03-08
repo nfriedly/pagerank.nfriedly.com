@@ -10,10 +10,9 @@ Todo:
 
 * Change bookmarklet to a popup window so that it can store the results in localStorage
 * Sort results by date, newest first
-* Add option to delete a result from the list (and storage)
+* Add option to delete a result from the list (and localStorage)
+* Add option to refresh results > 24 hours old
 * Add support for multiple values at different dates
-* Add in server-side caching
-* Add in server-side rate-limiting
 
 GPLv3 License:
 --------------
