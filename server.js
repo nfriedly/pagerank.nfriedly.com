@@ -37,10 +37,8 @@ function getPr(req, res, js) {
 	
 	cache.getPr(url, function(err, pagerank) {
 		if (pagerank !== null) {
-			console.log('cache hit');
 			return sendResponse(null, res, url, pagerank);
 		}
-		console.log('cache miss');
 		cache.checkIpAllowed(req.connection.remoteAddress, function (err, allowed) {
 			if (!allowed) {
 				return res.status(403).json({error: "Sorry, you've hit the rate limit. Please try again in 24 hours."});
