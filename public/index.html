@@ -37,6 +37,9 @@
 			document.body.className = "";
 			window.onresize = null;
 		}
+	} else {
+		var ping = document.createElement('img');
+		ping.src = '/ping';
 	}
 </script>
 <div class="navbar navbar-static-top">
@@ -92,7 +95,8 @@
   <footer class="container">  
   	<hr>
 	<p><a href="http://pagerank.nfriedly.com/">Google PageRank Lookup Tool</a> by
-		  <a href="http://nfriedly.com/">Nathan Friedly</a> with <a href="http://nodejs.org">node.js</a>.</p>
+		  <a href="http://nfriedly.com/">Nathan Friedly</a> with <a href="http://nodejs.org">node.js</a>. 
+		  See the <a href="https://github.com/nfriedly/pagerank.nfriedly.com">source code</a> on Github.</p>
 		  
 	<p><small>This site is not affiliated with Google.</small></p>
   </footer>
