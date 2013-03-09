@@ -24,6 +24,7 @@
 	.popup #results li:first-child {display: inline}
 	.popup #results ul { padding-top: 1.5em; padding-left: 1em; }
 	.popup .jumbotron { padding: 0 0 1em;}
+	.popup .container { width:100% }
 	
   </style>
 </head>
@@ -98,7 +99,7 @@
   
   <script>
   	var bookmarklett = document.getElementById('bookmarklett');
-  	bookmarklett.href = "javascript:void(window.open('//" + location.host + "/#'+location.hostname+location.pathname, 'pagerank', 'scrollbars=1,width=450,height=200'))";
+  	bookmarklett.href = "javascript:void(window.open('http://" + location.host + "/#'+location.hostname+location.pathname, 'pagerank', 'scrollbars=1,width=450,height=200'))";
   	bookmarklett.onclick = function() {
   		alert('To use this bookmarklett:\n\n1) Drag the "Get Pagerank" button to your bookmarks toolbar\n2) Navigate to the page you would like to look up\n3) Click the "Get Pagerank" bookmark you created in step 1'); 
   		return false;
