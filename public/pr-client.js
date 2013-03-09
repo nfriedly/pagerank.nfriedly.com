@@ -2,12 +2,15 @@ var PageRank = Backbone.Model.extend({
 	collection: PageRanks,
 	pagerank: undefined,
 	timestamp: null,
+	source: null,
 	initialize: function(attrs, options) {
 		if (typeof attrs.timestamp == "string" ) {
 			attrs.timestamp = new Date(attrs.timestamp);
 		}
 		this.set('timestamp', attrs.timestamp || new Date());
 		this.set('id', this.normalize(attrs.id || ""));
+
+		this.on('change:pagerank', this.trackPr, this);
 	},
 	
 	normalize: function(url) {
@@ -44,6 +47,10 @@ var PageRank = Backbone.Model.extend({
 			response.timestamp = new Date(response.timestamp);
 		}
 		return response;
+	},
+	
+	trackPr: function() {
+		_gaq.push(['_trackEvent', 'PageRank', this.get('id'), this.get('pagerank')]);
 	}
 });
 
@@ -190,7 +197,9 @@ var FormView = Backbone.View.extend({
 		this.input = this.$('input');
 		
 		if (window.location.hash && window.location.hash.length > 3) {
-			this.lookup(window.location.hash.substr(1));
+			var url = window.location.hash.substr(1);
+			this.lookup(url);
+			_gaq.push(['_trackEvent', 'Lookup', 'Bookmarklett', url]);
 		}
 	},
 	
@@ -199,6 +208,7 @@ var FormView = Backbone.View.extend({
 		var id = this.input.val();
 		if (!id) return alert('Type in a URL first!');
 		this.lookup(id);
+		_gaq.push(['_trackEvent', 'Lookup', 'Click', id]);
 	},
 	
 	lookup: function(id) {
@@ -214,3 +224,30 @@ var FormView = Backbone.View.extend({
 });
 
 new FormView({el: $('#lookup-form')});
+
+var Bookmarklett = Backbone.View.extend({
+	events: {
+		"click" : "handleClick",
+		"dragend": "handleInstall"
+	},
+
+	initialize: function() {
+  		this.el.href = "javascript:void(window.open('http://" + location.host + "/#'+location.hostname+location.pathname, 'pagerank', 'scrollbars=1,width=450,height=200'))";
+  	},
+	
+	handleClick: function(event) {
+		event.preventDefault();
+		alert('To use this bookmarklett:\n\n1) Drag the "Get Pagerank" button to your bookmarks toolbar\n2) Navigate to the page you would like to look up\n3) Click the "Get Pagerank" bookmark you created in step 1'); 
+		_gaq.push(['_trackEvent', 'Install', 'Fail']);
+	},
+	
+	handleInstall: function() {
+		// we don't actually know that the bookmarklett was installed, but we're just going to pretend it was
+		_gaq.push(['_trackEvent', 'Install', 'Success']);
+	}
+
+});
+
+new Bookmarklett({el: $('#bookmarklett')});
+
+

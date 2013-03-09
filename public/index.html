@@ -30,18 +30,7 @@
 </head>
 
 <body>
-<script>
-	if (location.hash && location.hash.length) {
-		document.body.className = "popup";
-		window.onresize = function() {
-			document.body.className = "";
-			window.onresize = null;
-		}
-	} else {
-		var ping = document.createElement('img');
-		ping.src = '/ping';
-	}
-</script>
+
 <div class="navbar navbar-static-top">
     <div class="navbar-inner">
     	<div class="container">
@@ -101,14 +90,6 @@
 	<p><small>This site is not affiliated with Google.</small></p>
   </footer>
   
-  <script>
-  	var bookmarklett = document.getElementById('bookmarklett');
-  	bookmarklett.href = "javascript:void(window.open('http://" + location.host + "/#'+location.hostname+location.pathname, 'pagerank', 'scrollbars=1,width=450,height=200'))";
-  	bookmarklett.onclick = function() {
-  		alert('To use this bookmarklett:\n\n1) Drag the "Get Pagerank" button to your bookmarks toolbar\n2) Navigate to the page you would like to look up\n3) Click the "Get Pagerank" bookmark you created in step 1'); 
-  		return false;
-  	};
-  </script>
   <script>
   	function addScript(src) {
   		document.write('<script src="' + src + '"><\/script>');
