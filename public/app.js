@@ -3,6 +3,9 @@ var PageRank = Backbone.Model.extend({
 	pagerank: undefined,
 	timestamp: null,
 	initialize: function(attrs, options) {
+		if (typeof attrs.timestamp == "string" ) {
+			attrs.timestamp = new Date(attrs.timestamp);
+		}
 		this.set('timestamp', attrs.timestamp || new Date());
 		this.set('id', this.normalize(attrs.id || ""));
 	},
@@ -179,18 +182,26 @@ new ResultsList({el: $('#results'), collection: pageRanks});
 
 var FormView = Backbone.View.extend({
 	events: {
-		"click button": "lookup"
+		"click button": "handleLookupClick"
 	},
 	input: null,
 	
 	initialize: function() {
 		this.input = this.$('input');
+		
+		if (window.location.hash && window.location.hash.length > 3) {
+			this.lookup(window.location.hash.substr(1));
+		}
 	},
 	
-	lookup: function(event) {
+	handleLookupClick: function(event) {
 		event.preventDefault();
 		var id = this.input.val();
 		if (!id) return alert('Type in a URL first!');
+		this.lookup(id);
+	},
+	
+	lookup: function(id) {
 		var pr = pageRanks.get(id)
 		if (pr && pr.newish()) {
 			pr.trigger('flash', 3);

@@ -19,8 +19,10 @@
 	#results ul, #results ul li {list-style-type: none; margin-left: 1px;padding-left: 0;}
 	.prbar {width: 40px; background: #D9D9D9; float: left; margin: 10px 5px 0 0; position: relative;}
 	.prbar-inner {background: #5EAA5E; height: 4px; line-height: 4px; position: relative;}
-	#lookup-form, .about {overflow:hidden;}
-	.popup #lookup-form, .popup .about { height: 0; transition: height 2s;}
+	/* popup styles */
+	.popup #lookup-form, .popup .about, .popup .brand span, .popup #results h2, .popup #results li {display: none;}
+	.popup #results li:first-child {display: inline}
+	.popup #results ul { padding-top: 1.5em; }
 	.popup .jumbotron { padding: 0 0 1em;}
 	
   </style>
@@ -39,7 +41,7 @@
 <div class="navbar navbar-static-top">
     <div class="navbar-inner">
     	<div class="container">
-        	<a href="/" class="brand">Google PageRank Lookup Tool</a>
+        	<a href="/" class="brand">Google PageRank <span>Lookup Tool</span></a>
         </div>
       </div>
     </div>
@@ -65,10 +67,10 @@
 	</div>
 
     <section class="container about">
-        <div class="well span4 pull-right center" id="bookmarklett">
+        <div class="well span4 pull-right center" id="bookmarklett-container">
 		  <h2>Bookmarklett</h2>
 		  
-		  <p><a class="btn btn-large btn-info" id="bookmarklett" href="javascript:void(window.open('//pagerank.nfriedly.com/#'+location.hostname+location.pathname, 'pagerank', 'width=350,height=250'))">Get
+		  <p><a class="btn btn-large btn-info" id="bookmarklett" href="#">Get
 		  PageRank</a></p>
 
 		  <p>Drag this to your bookmarks toolbar</p>
@@ -92,6 +94,7 @@
   
   <script>
   	var bookmarklett = document.getElementById('bookmarklett');
+  	bookmarklett.href = "javascript:void(window.open('//" + location.host + "/#'+location.hostname+location.pathname, 'pagerank', 'scrollbars=1,width=400,height=250'))";
   	bookmarklett.onclick = function() {
   		alert('To use this bookmarklett:\n\n1) Drag the "Get Pagerank" button to your bookmarks toolbar\n2) Navigate to the page you would like to look up\n3) Click the "Get Pagerank" bookmark you created in step 1'); 
   		return false;
