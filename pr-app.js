@@ -8,7 +8,7 @@ var app = express();
 
 app.configure(function() {
 	app.use(express.static(__dirname + '/public'));
-	app.use(require('less-middleware')({ src: __dirname + '/public' }));
+	app.disable('x-powered-by');
 });
 
 app.configure('production', function() {
