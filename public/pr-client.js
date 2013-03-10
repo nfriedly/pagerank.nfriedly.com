@@ -52,7 +52,7 @@ var PageRank = Backbone.Model.extend({
 	
 	trackPr: function() {
 		_gaq.push(['_trackEvent', 'PageRank', this.get('id'), this.get('pagerank')]);
-	}
+	},
 	
 	trackErr: function(model, data) {
 		var err = (data && data.status == 403) ? 'Ratelimit' : null;
@@ -73,6 +73,7 @@ var PageRanks = Backbone.Collection.extend({
 	initialize: function() {
 		//this.on("add", this.save); - only want to save when we have results back from the server
 		this.on("change", this.save);
+		this.on('remove', this.save);
 	},
 	
 	get: function(id) {
@@ -89,18 +90,50 @@ var PageRanks = Backbone.Collection.extend({
 var cachedResults = window.localStorage && window.localStorage.pageranks;
 var pageRanks = new PageRanks(cachedResults && JSON.parse(cachedResults) || []);
 
+var DeletedAlert = Backbone.View.extend({
+	model: null,
+	events: {
+		'click .close': 'remove',
+		'click .undo': 'undo'
+	},
+	template: _.template('<div class="alert alert-delete">' 
+	    + '<button type="button" class="close">&times;</button>'
+    	+ 'Deleted <%= id %>'
+		+ ' <button type="button" class="undo btn btn-info btn-small">Undo</button>'
+    	+ '</div>'),
+    	
+    render: function() {
+    	setTimeout(_.bind(this.remove, this), 30*1000);
+    	return this.$el.html(this.template({id: this.model.get('id')}));
+    },
+    	
+	undo: function() {
+		pageRanks.add(this.model);
+		pageRanks.save();
+		this.remove();
+	}
+});
+
 var PageRankView = Backbone.View.extend({
 	tagName: 'li',
 	model: null,
+	
+	events: {
+		'click .refresh': 'refresh',
+		'click .delete': 'destroy'
+	},
 	
 	initialize: function() {
 		// todo: make this run exactly once, the first time the collection has 1+ elements
     	this.listenTo(this.model, "change", this.render);
     	this.listenTo(this.model, "flash", this.flash);
+    	this.listenTo(this.model, "remove", this.remove);
 	},
 	
 	template: _.template('<div class="prbar"><div class="prbar-inner" style="width: <%= (+pagerank || 0)  * 10 %>%"></div></div>'
-		+ ' - <%= pagerank %> - <a href="<%= url %>"><%= url %></a>'),
+		+ ' - <%= pagerank %> - <a href="<%= url %>"><%= url %></a> ' 
+		+ '<button type="button" class="refresh btn btn-success">Refresh</button>'
+		+ '<button type="button" class="delete btn btn-danger">&times;</button>'),
 	
 	render: function() {
 		var pr = this.model.get('pagerank');
@@ -127,6 +160,17 @@ var PageRankView = Backbone.View.extend({
 		_.delay(function() {
 			$el.removeClass('flash');
 		}, times * 1000);
+	},
+	
+	refresh: function() {
+		this.model.set('pagerank', undefined)
+		this.model.fetch();
+	},
+	
+	destroy: function() {
+		// we don't want to actually destroy the model, just remove it from the colection
+		this.model.trigger('destroy', this.model);
+		this.remove();
 	}
 });
 
@@ -145,8 +189,8 @@ var ResultsList = Backbone.View.extend({
     	this.list = this.$('ul');
     	
     	this.listenTo(this.collection, 'add', this.addOne);
-    	this.listenTo(this.collection, 'remove', this.removeOne);
     	this.listenTo(this.collection, 'error', this.error);
+    	this.listenTo(this.collection, 'destroy', this.handleDestroy);
     	
     	if (this.collection.models.length) {
     		this.collection.each(this.addOne, this);
@@ -195,6 +239,11 @@ var ResultsList = Backbone.View.extend({
 			window.console.error(msg, data, model);
 		}
 		this.collection.remove(model.id);
+	},
+	
+	handleDestroy: function(model) {
+		new DeletedAlert({model: model}).render().insertAfter(this.$('h2'));
+		this.collection.remove(model.get('id')); // todo: check if this is necessary - it should be automatic
 	}
 });
 
