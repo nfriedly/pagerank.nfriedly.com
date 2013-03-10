@@ -11,6 +11,7 @@ var PageRank = Backbone.Model.extend({
 		this.set('id', this.normalize(attrs.id || ""));
 
 		this.on('change:pagerank', this.trackPr, this);
+		this.on('error', this.trackErr, this)
 	},
 	
 	normalize: function(url) {
@@ -51,6 +52,18 @@ var PageRank = Backbone.Model.extend({
 	
 	trackPr: function() {
 		_gaq.push(['_trackEvent', 'PageRank', this.get('id'), this.get('pagerank')]);
+	}
+	
+	trackErr: function(model, data) {
+		var err = (data && data.status == 403) ? 'Ratelimit' : null;
+		if (!err) {
+			try {
+				err = JSON.stringify(data);
+			} catch (ex) {
+				err = data;
+			}
+		}
+		_gaq.push(['_trackEvent', 'Error', err, this.get('id')]);
 	}
 });
 
