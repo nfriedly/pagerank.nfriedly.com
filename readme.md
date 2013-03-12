@@ -13,14 +13,11 @@ Plays nicely with most node.js 0.8+ environments, including heroku. Expects a
 Todo:
 -----
 
-* Fix bookmarklet - should be a popup window so that it can store the results in localStorage
 * Sort results by date, newest first
-* Add option to delete a result from the list (and localStorage)
-* Add option to refresh results > 24 hours old
 * Add support for multiple values at different dates
-* Add multicore support
 * Clear form on submit
-* Add multiline form option
+* Add partial support for legacy bookmarklett (pr, but no history), add analytics to legacy bookmarklett
+* Redirect old pr app to new one.
 
 
 GPLv3 License:

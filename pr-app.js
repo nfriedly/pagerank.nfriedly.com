@@ -56,6 +56,11 @@ app.get('/pagerank', function(req, res) {
 	getPr(req, res, false);
 });
 
+app.get('/headers', function(req, res) {
+	req.headers.conn_remote_addr = req.connection.remoteAddress;
+	res.json(req.headers);
+});
+
 var port = process.env.PORT || 3000;
 app.listen(port);
 console.log('PageRank server with pid ' + process.pid + ' listening on port ' + port);
