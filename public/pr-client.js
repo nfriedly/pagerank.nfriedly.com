@@ -174,6 +174,79 @@ var PageRankView = Backbone.View.extend({
 	}
 });
 
+
+
+var SignupView = Backbone.View.extend({
+	PLAN_RESET: 'reset',
+	PLAN_PAYGO: 'paygo',
+	events: {
+		'click .close': 'hide',
+		'click #reset-buy': 'buyReset',
+		'click #paygo-signup': 'paygoSignup'
+	},
+	delayed_url: undefined,
+	show: function(force) {
+		this.$el.show();
+		this.$('.close').toggle(!force);
+		this.$('#payment-notify').toggle(!!force);
+		_gaq.push(['_trackEvent', 'signup-form', force ? 'auto' : 'manual']);
+	},
+	hide: function() {
+		this.$el.hide();
+		_gaq.push(['_trackEvent', 'signup-form-close']);
+	},
+	buyReset: function() {
+      StripeCheckout.open({
+        key:         'pk_test_UISfg44mvvob3QnCVacGMQQc',
+        address:     false,
+        amount:      200,
+        name:        'PageRank Lookup Limit Reset',
+        description: '10 additional Google Pagerank Lookups',
+        panelLabel:  'Checkout',
+        token:       this.getTokenHandler(this.PLAN_RESET)
+      });
+	  _gaq.push(['_trackEvent', 'purchase-click', this.PLAN_RESET]);
+      return false;
+    },
+    paygoSignup: function() {
+	  _gaq.push(['_trackEvent', 'purchase-click', this.PLAN_PAYGO]);
+	  alert('Thanks for your interest, this option will be avaliable soon!\nIn the meanwhile, please try out the 10 for $2 option');
+	  return false;
+    },
+    getTokenHandler: function(plan) {
+    	var self = this;
+    	return function(stripe_res) {
+    		console.log(stripe_res);
+	    	$.post('/purchase/' + plan, stripe_res)
+			.done(function() {
+				self.hide();
+				self.trigger('purchase');
+				_gaq.push(['_trackEvent', 'purchase-complete', plan]);
+			})
+			.error(self.handleProvisionError);
+	  		_gaq.push(['_trackEvent', 'purchase', plan]);
+	    }
+    },
+    handleProvisionError: function(data) {
+		var dataStr = "";
+		try {
+			dataStr = JSON.stringify(data);
+		} catch(ex) {};
+		alert('There was an error, please contact us for support.' + (dataStr ? '\nTechnical details: ' + dataStr : ''));
+		_gaq.push(['_trackEvent', 'provision-error', dataStr]);
+    }
+});
+
+
+var signupView = new SignupView({el: $('#signup')});
+
+
+// this one isn't worth making a view for
+$('#signup-link').click(function() {
+	signupView.show(false); 
+	return false;
+});
+
 var ResultsList = Backbone.View.extend({
 	collection: null,
 	list: null,
@@ -198,6 +271,8 @@ var ResultsList = Backbone.View.extend({
     	
     	this.errContainer = this.$('.alert-error');
     	this.errBody = this.$('.alert-error p');
+    	
+    	this.listenTo(signupView, 'purchase', this.retry);
 	},
 	
 	show: function() {
@@ -219,24 +294,35 @@ var ResultsList = Backbone.View.extend({
 		delete this.views[model];
 	},
 	
+	retry: function() {
+		var pr = this.failed_model;
+		if (pr) {
+			pr.fetch();
+			this.addOne(pr);
+			delete this.failed_model;
+		}
+	},
+	
 	hideError: function() {
 		this.errContainer.slideUp();
 	},
 	
 	error: function(model, data) {
-		var msg;
-		if (data && typeof data.error == "string") {
-			msg = data.error;
-		} else if (data.status == 403) {
-			// this is actually the text in the ajax response, but I think some browsers don't provide non-200 responses
-			msg = "Sorry, you've hit the rate limit. Please try again in 24 hours."; 
-		} else if (data.readyState) {
-			msg = "Error communicating with server, please refresh the page and try again in a few minutes";
-		}
-		this.errBody.text(msg);
-		this.errContainer.fadeIn();
-		if (window.console && window.console.error) {
-			window.console.error(msg, data, model);
+		this.failed_model = model;
+		if (data.status == 403) {
+			signupView.show(true);
+		} else  {
+			var msg;
+			if (data && typeof data.error == "string") {
+				msg = data.error;
+			} else {
+				msg = "Error communicating with server, please refresh the page and try again in a few minutes";
+			}
+			this.errBody.text(msg);
+			this.errContainer.fadeIn();
+			if (window.console && window.console.error) {
+				window.console.error(msg, data, model);
+			}
 		}
 		this.collection.remove(model.id);
 	},
@@ -271,6 +357,7 @@ var FormView = Backbone.View.extend({
 		if (!id) return alert('Type in a URL first!');
 		this.lookup(id);
 		_gaq.push(['_trackEvent', 'Lookup', 'Click', id]);
+		this.input.val("");
 	},
 	
 	lookup: function(id) {
@@ -311,5 +398,4 @@ var Bookmarklett = Backbone.View.extend({
 });
 
 new Bookmarklett({el: $('#bookmarklett')});
-
 

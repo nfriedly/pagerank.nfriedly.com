@@ -5,7 +5,8 @@
   "dependencies": {
     "express": "3.x",
     "pagerank": "1.x.x",
-    "redis": "~0.8.2"
+    "redis": "~0.8.2",
+    "stripe": "~1.3.0"
   },
   "engines": {
     "node": "0.8.x",

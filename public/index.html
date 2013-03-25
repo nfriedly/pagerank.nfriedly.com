@@ -27,7 +27,10 @@
 	.popup #results ul { padding-top: 1.5em; padding-left: 1em; }
 	.popup .jumbotron { padding: 0 0 1em;}
 	.popup .container { width:100% }
-	
+	#signup {}
+	#signup-inner {position: fixed; top: 6em; z-index:2;}
+	#payment-options, #payment-options > li {list-style-type: none;}
+	#payment-options > li {display:inline-block}
   </style>
   
   <meta name="keywords" content="pagerank,google,ranking,seo,search engine optimization,marketing,working">
@@ -60,7 +63,9 @@ src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
   </div>
 
 	<div class="jumbotron">
+
 		<form id="lookup-form" action="/pagerank" class="form-inline container">
+		
 			<span class="btn-large">URL:</span>
 			<div class="input-append">
 			  <input type="text" id="url" name="url" class="input-xlarge btn-large span9" placeholder="http://example.com/"autofocus>
@@ -99,9 +104,43 @@ src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
 		<p>Learn a bit more about <a href="http://www.google.com/insidesearch/howsearchworks/thestory/">how search works</a> or <a href="https://en.wikipedia.org/wiki/PageRank">PageRank</a> in particular.</p>
 	</section>
 
+	<section id="signup" class="container row" style="display:none">
+		<div class="well span11" id="signup-inner">
+			<button class="close">&times;</button>
+			<h2>Payment Options</h2>
+			<div id="payment-notify" class="alert alert-error  hideme"><strong>You have reached the daily limit of the free tier.</strong> Please sign in or choose a payment option.</div>
+			<ul id="payment-options" class="row">
+				<li id="paygo" class="plan span3">
+					<h3>Unlimited lookups</h3>
+					<p>Pay as you go, only $0.17 per lookup</p>
+					<ul>
+						<li>First 10 lookups per day are free</li>
+						<li>After that, just $0.17 per lookup</li>
+					</ul>
+					<span class="label label-info">Coming soon!</span>
+					<button data-plan="paygo" id="paygo-signup" disabled class="btn btn-primary">Sign Up</button>
+				</li>
+				<li id="reset" class="plan span3">
+					<h3>10 lookups for $2</h3>
+					<p>Reset the daily limit!</p>
+					<ul>
+						<li>No account necessary, your information is not stored</li>
+						<li>Good for 24 hours, after that you get another 10 free lookups</li>
+					</ul>
+					<button data-plan="reset" id="reset-buy" class="btn btn-primary">Buy now</button>
+				</li>
+				<li id="signin span3">
+					<h3>Sign into your account</h3>
+					<buttion class="login">Log In</button>
+				</li>
+			</ul>
+		</div>
+	</section>
+	
 
   <footer class="container">  
   	<hr>
+  	<a class="pull-right" id="signup-link" href="#signup">Sign up / Sign in</a>
 	<p><a href="http://pagerank.nfriedly.com/">Google PageRank Lookup Tool</a> by
 		  <a href="http://nfriedly.com/">Nathan Friedly</a> with <a href="http://nodejs.org">node.js</a>. 
 		  See the <a href="https://github.com/nfriedly/pagerank.nfriedly.com">source code</a> on Github.</p>
@@ -135,5 +174,6 @@ src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
   })();
   </script>
+  <script src="https://checkout.stripe.com/v2/checkout.js"  defer="defer"></script>
 </body>
 </html>

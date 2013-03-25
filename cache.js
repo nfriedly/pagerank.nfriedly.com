@@ -9,19 +9,28 @@ client.on("error", function (err) {
 	console.error("Error " + err);
 });
 
-exports.maxPerIp = 10;
+exports.maxPerIp = 1;
 exports.prExpire = 24*60*60;
 exports.ipExpire = 24*60*60;
 
+function getKey(ip) {
+	return (new Date()).getDate() + "-" + ip;
+}
+
 exports.checkIpAllowed = function(ip, callback) {
-	var key = (new Date()).getDate() + "-" + ip;
+	var key = getKey(ip);
 	client.incr(key, function(err, res) {
 		// incr creates non-existant keys and gives them a value of 1
 		if (res == 1) {
 			client.expire(key, exports.ipExpire);
 		}
-		callback(err, res && res <= exports.maxPerIp);
+		callback(err, res && res <= exports.maxPerIp, res);
 	});
+}
+
+exports.resetIp = function(ip, callback) {
+	var key = getKey(ip);
+	client.set(key, 0, callback);
 }
 
 var URL_RE = /https?:\/\/([^#]+)(#.*)?/;
