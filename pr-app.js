@@ -18,6 +18,9 @@ app.configure('production', function() {
 	app.use(express.compress());
 });
 
+function getIp(req) {
+	
+}
 
 function sendResponse(err, res, url, pr) {
 	var data;
@@ -58,6 +61,12 @@ function getPr(req, res, js) {
 app.get('/pagerank', function(req, res) {
 	getPr(req, res, false);
 });
+
+app.get('/headers', function(req, res) {
+	req.headers.connRemoteAddress = req.connection.remoteAddress;
+	res.json(req.headers);
+});
+
 
 app.post('/purchase/reset', function(req, res) {
 	console.log(req.body);

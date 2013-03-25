@@ -9,7 +9,7 @@ client.on("error", function (err) {
 	console.error("Error " + err);
 });
 
-exports.maxPerIp = 1;
+exports.maxPerIp = 10;
 exports.prExpire = 24*60*60;
 exports.ipExpire = 24*60*60;
 
