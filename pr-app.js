@@ -19,7 +19,12 @@ app.configure('production', function() {
 });
 
 function getIp(req) {
-	
+	if (req.headers['x-forwarded-for']) {
+		// this header can be faked, in that case heroku adds the real ip at the end
+		return req.headers['x-forwarded-for'].split(', ').pop(); 
+	}
+	// for local development
+	return req.connection.remoteAddress;
 }
 
 function sendResponse(err, res, url, pr) {
@@ -44,7 +49,7 @@ function getPr(req, res, js) {
 		if (pagerank !== null) {
 			return sendResponse(null, res, url, pagerank);
 		}
-		cache.checkIpAllowed(req.connection.remoteAddress, function (err, allowed, used) {
+		cache.checkIpAllowed(getIp(req), function (err, allowed, used) {
 			res.setHeader('X-Free-Lookups-Used', used);
 			if (!allowed) {
 				return res.status(403).json({error: "Sorry, you've hit the rate limit. Please try again in 24 hours."});
@@ -62,11 +67,6 @@ app.get('/pagerank', function(req, res) {
 	getPr(req, res, false);
 });
 
-app.get('/headers', function(req, res) {
-	req.headers.connRemoteAddress = req.connection.remoteAddress;
-	res.json(req.headers);
-});
-
 
 app.post('/purchase/reset', function(req, res) {
 	console.log(req.body);
@@ -77,7 +77,7 @@ app.post('/purchase/reset', function(req, res) {
 		description: 'PageRank Lookup Limit Reset'
 	}, function(stripe_response) {
 		console.log(stripe_response);
-		cache.resetIp(req.connection.remoteAddress, function (err) {
+		cache.resetIp(getIp(req), function (err) {
 			if (err) {
 				return res.status(500).json({err: err, stripe_response: stripe_response});
 			}
