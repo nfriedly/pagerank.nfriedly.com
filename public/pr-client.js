@@ -46,6 +46,8 @@ var PageRank = Backbone.Model.extend({
 		delete response.url;
 		if (response.timestamp && typeof response.timestamp != typeof (new Date())) {
 			response.timestamp = new Date(response.timestamp);
+		} else {
+			response.timestamp = new Date();
 		}
 		return response;
 	},
@@ -84,6 +86,11 @@ var PageRanks = Backbone.Collection.extend({
 		if (window.localStorage) {
 			window.localStorage.pageranks = JSON.stringify(this.toJSON());
 		}
+	},
+	
+	comparator: function(model) {
+		// sorts by age, oldest first (the view adds new items to the top of the list, so oldest-first works)
+		return model.get('timestamp').getTime();
 	}
 });
 

@@ -16,7 +16,6 @@ environment variables. The `REDISCLOUD_URL` variable should be in the form of:
 Todo:
 -----
 
-* Sort results by date, newest first
 * Add support for multiple values at different dates
 * Add partial support for legacy bookmarklett (pr, but no history), add analytics to legacy bookmarklett
 * Redirect old pr app to new one
