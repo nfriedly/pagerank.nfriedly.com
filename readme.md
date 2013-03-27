@@ -21,14 +21,12 @@ Todo:
 * Redirect old pr app to new one
 * Use Bootstrap's built-in modals and whatnot
 * Uses requirejs or something similar to organize client-side js
-* Finish stripe setup
+* Add https payment window so that Stripe works
 * Add pay-as-you-go plan & user accounts
 * Move google analytics out of core classes
 * Reduce coupling
 * Lots of unit tests
-* Update node version
 * Make html use configs
-* Update to latest node.js release
 
 
 GPLv3 License:
