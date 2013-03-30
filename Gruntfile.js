@@ -11,11 +11,7 @@ module.exports = function (grunt) {
         watch: {
             scripts: {
                 files: allScripts,
-                tasks: ['jshint'],
-                options: {
-                    debounce: 5000, // miliseconds
-                    interrupt: true
-                }
+                tasks: ['jshint']
             }
         },
         jsbeautifier: {
@@ -29,15 +25,23 @@ module.exports = function (grunt) {
             }
         },
         jshint: {
-            all: allScripts,
             options: {
                 //camelcase: true,
                 // quotmark: 'single',
                 //strict: true,
                 undef: true,
                 unused: true,
-                browser: true,
                 node: true
+            },
+            uses_defaults: serverScripts,
+            with_overrides: {
+                options: {
+                    node: false,
+                    browser: true
+                },
+                files: {
+                    src: clientScripts
+                }
             }
         }
     });
