@@ -12,5 +12,11 @@
     "node": "0.10.x",
     "npm": "1.x"
   },
-  "license": "GPL v3"
+  "license": "GPL v3",
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-contrib-jshint": "~0.3.0",
+    "grunt-jsbeautifier": "~0.1.6",
+    "grunt-contrib-watch": "~0.3.1"
+  }
 }
