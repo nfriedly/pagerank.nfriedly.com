@@ -95,6 +95,4 @@ app.post('/purchase/reset', function (req, res) {
     });
 });
 
-var port = process.env.PORT || 3000;
-app.listen(port);
-console.log('PageRank server with pid ' + process.pid + ' listening on port ' + port);
+module.exports = app;

@@ -1,3 +1,5 @@
+var path = require('path');
+
 module.exports = function (grunt) {
     'use strict';
 
@@ -33,8 +35,8 @@ module.exports = function (grunt) {
                 unused: true,
                 node: true
             },
-            uses_defaults: serverScripts,
-            with_overrides: {
+            server: serverScripts,
+            client: {
                 options: {
                     node: false,
                     browser: true
@@ -43,14 +45,27 @@ module.exports = function (grunt) {
                     src: clientScripts
                 }
             }
+        },
+        express: {
+            pagerank_app: {
+                options: {
+                    port: 3000,
+                    bases: __dirname + '/public',
+                    supervisor: true,
+                    watchChanges: true,
+                    server: path.resolve('./pr-app')
+                }
+            }
         }
+
     });
 
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-jsbeautifier');
     grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-express');
 
     // Default task(s).
-    grunt.registerTask('default', ['jsbeautifier', 'jshint']);
+    grunt.registerTask('default', ['jsbeautifier', 'jshint', 'express', 'express-keepalive']);
 
 };
