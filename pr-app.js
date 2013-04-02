@@ -17,6 +17,18 @@ app.configure('production', function () {
     app.use(express.compress());
 });
 
+function checkAuth(req, res, next) {
+    cache.checkIpAllowed(getIp(req), function (err, allowed, used) {
+        res.setHeader('X-Free-Lookups-Used', used);
+        if (!allowed) {
+            return res.status(403).json({
+                error: "Sorry, you've hit the rate limit. Please try again in 24 hours."
+            });
+        }
+        next();
+    });
+}
+
 function getIp(req) {
     if (req.headers['x-forwarded-for']) {
         // this header can be faked, in that case heroku adds the real ip at the end
@@ -51,25 +63,19 @@ function getPr(req, res) {
 
     cache.getPr(url, function (err, pagerank) {
         if (pagerank !== null) {
+            res.setHeader('X-PR-Source', 'Cache');
             return sendResponse(null, res, url, pagerank);
         }
-        cache.checkIpAllowed(getIp(req), function (err, allowed, used) {
-            res.setHeader('X-Free-Lookups-Used', used);
-            if (!allowed) {
-                return res.status(403).json({
-                    error: "Sorry, you've hit the rate limit. Please try again in 24 hours."
-                });
-            }
 
-            new PageRank(url, function (err, pr) {
-                sendResponse(err, res, url, pr);
-                cache.setPr(url, pr);
-            });
+        new PageRank(url, function (err, pr) {
+            res.setHeader('X-PR-Source', 'Live');
+            sendResponse(err, res, url, pr);
+            cache.setPr(url, pr);
         });
     });
 }
 
-app.get('/pagerank', function (req, res) {
+app.get('/pagerank', checkAuth, function (req, res) {
     getPr(req, res, false);
 });
 
@@ -81,16 +87,26 @@ app.post('/purchase/reset', function (req, res) {
         currency: 'USD',
         card: req.body.id,
         description: 'PageRank Lookup Limit Reset'
-    }, function (stripe_response) {
-        console.log(stripe_response);
+    }, function (err, stripe_response) {
+        if (err) {
+            return res.status(402).json({
+                paid: false,
+                error: err.message || err.name || 'Unknown error: ' + err.toString()
+            });
+        }
         cache.resetIp(getIp(req), function (err) {
             if (err) {
+                try {
+                    err = JSON.stringify(err);
+                } catch (ex) {}
                 return res.status(500).json({
-                    err: err,
-                    stripe_response: stripe_response
+                    error: 'Internal error resetting your account, please contact support.\n\nTechnical details cache reset issue:\n' + err,
+                    paid: stripe_response.paid
                 });
             }
-            res.json(stripe_response);
+            res.json({
+                paid: stripe_response.paid
+            });
         });
     });
 });

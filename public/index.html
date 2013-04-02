@@ -3,35 +3,7 @@
 <head>
   <title>Google PageRank Lookup Tool - Free Tier, No Captcha, History, Bookmarklett</title>
   <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootswatch/2.3.0/superhero/bootstrap.min.css" type="text/css">
-  <style type="text/css">
-  	input.btn-large {height:42px;}
-  	#results {display: none;}
-  	.flash {animation-name: flash; animation-duration: 1s; animation-iteration-count: infinite;}
-	@keyframes flash {
-		0% {background-color:transparent;}
-		50% {background-color: #468847;}
-		100% {background-color:transparent;}
-	}
-	.jumbotron {padding: 6em 0; margin:0; background-image: url("/debut_dark.png"); background-repeat: repeat; background-size: auto auto; border-bottom: 1px solid #20262D;}
-	.about {margin-top:3em; }
-	.center {text-align: center;}
-	.footer {padding:4em 0;}
-	#results ul, #results ul li {list-style-type: none; margin-left: 1px;padding-left: 0;}
-	.prbar {width: 40px; background: #D9D9D9; float: left; margin: 10px 5px 0 0; position: relative;}
-	.prbar-inner {background: #5EAA5E; height: 4px; line-height: 4px; position: relative;}
-	#results li button {visibility: hidden; margin-left:1em;}
-	#results li:hover button {visibility: visible}
-	.alert-delete .btn {margin-left: 1em;}
-	.popup #lookup-form, .popup .about, .popup .brand span, .popup #results h2, .popup #results li, .popup footer {display: none;}
-	.popup #results li:first-child {display: inline}
-	.popup #results ul { padding-top: 1.5em; padding-left: 1em; }
-	.popup .jumbotron { padding: 0 0 1em;}
-	.popup .container { width:100% }
-	#signup {}
-	#signup-inner {position: fixed; top: 6em; z-index:2;}
-	#payment-options, #payment-options > li {list-style-type: none;}
-	#payment-options > li {display:inline-block}
-  </style>
+  <link rel="stylesheet" href="/styles.css" type="text/css">
   
   <meta name="keywords" content="pagerank,google,ranking,seo,search engine optimization,marketing,working">
   <meta name="description" content="Fast, reliable Pagerank tool: Up to 10 lookups per day for free,  keeps history of previous lookups, no CAPTCHAs or annoyances! Also includes a bookmarklett to lookup the pagerank of the current page">
@@ -104,38 +76,17 @@ src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
 		<p>Learn a bit more about <a href="http://www.google.com/insidesearch/howsearchworks/thestory/">how search works</a> or <a href="https://en.wikipedia.org/wiki/PageRank">PageRank</a> in particular.</p>
 	</section>
 
-	<section id="signup" class="container row" style="display:none">
-		<div class="well span11" id="signup-inner">
-			<button class="close">&times;</button>
-			<h2>Payment Options</h2>
-			<div id="payment-notify" class="alert alert-error  hideme"><strong>You have reached the daily limit of the free tier.</strong> Please sign in or choose a payment option.</div>
-			<ul id="payment-options" class="row">
-				<li id="paygo" class="plan span3">
-					<h3>Unlimited lookups</h3>
-					<p>Pay as you go, only $0.17 per lookup</p>
-					<ul>
-						<li>First 10 lookups per day are free</li>
-						<li>After that, just $0.17 per lookup</li>
-					</ul>
-					<span class="label label-info">Coming soon!</span>
-					<button data-plan="paygo" id="paygo-signup" disabled class="btn btn-primary">Sign Up</button>
-				</li>
-				<li id="reset" class="plan span3">
-					<h3>10 lookups for $2</h3>
-					<p>Reset the daily limit!</p>
-					<ul>
-						<li>No account necessary, your information is not stored</li>
-						<li>Good for 24 hours, after that you get another 10 free lookups</li>
-					</ul>
-					<button data-plan="reset" id="reset-buy" class="btn btn-primary">Buy now</button>
-				</li>
-				<li id="signin span3">
-					<h3>Sign into your account</h3>
-					<buttion class="login">Log In</button>
-				</li>
-			</ul>
+			
+    <div id="signup" class="modal hide fade">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		<div class="modal-body" id="signup-inner">
+			
 		</div>
-	</section>
+		<!-- div class="modal-footer">
+			<a href="#" class="btn">Close</a>
+			<a href="#" class="btn btn-primary">Save changes</a>
+		</div -->
+    </div>
 	
 
   <footer class="container">  
@@ -159,21 +110,21 @@ src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
   <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.10/backbone-min.js"></script>
+  <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js" defer></script>
   <script>
   	var _gaq = _gaq || [];
+	_gaq.push(['_setAccount', 'UA-1735765-25']);
+	_gaq.push(['_trackPageview']);
   </script>
+  <script src="/config.js"></script>
   <script src="/pr-client.js"></script>
   
   <script type="text/javascript">
-  _gaq.push(['_setAccount', 'UA-1735765-25']);
-  _gaq.push(['_trackPageview']);
-
   (function() {
     var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
     ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
   })();
   </script>
-  <script src="https://checkout.stripe.com/v2/checkout.js"  defer="defer"></script>
 </body>
 </html>

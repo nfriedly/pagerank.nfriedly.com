@@ -1,11 +1,11 @@
-/*globals Backbone:false, _:false, $:false, _gaq:false, StripeCheckout:false, alert:false*/
+/*globals Backbone:false, _:false, $:false, _gaq:false, alert:false, config:false*/
 
 var PageRank = Backbone.Model.extend({
     collection: PageRanks,
     pagerank: undefined,
     timestamp: null,
     source: null,
-    initialize: function (attrs /*, options*/) {
+    initialize: function (attrs /*, options*/ ) {
         if (typeof attrs.timestamp == "string") {
             attrs.timestamp = new Date(attrs.timestamp);
         }
@@ -182,77 +182,53 @@ var PageRankView = Backbone.View.extend({
 });
 
 
-
-var SignupView = Backbone.View.extend({
-    PLAN_RESET: 'reset',
-    PLAN_PAYGO: 'paygo',
-    events: {
-        'click .close': 'hide',
-        'click #reset-buy': 'buyReset',
-        'click #paygo-signup': 'paygoSignup'
-    },
-    delayed_url: undefined,
+var SignupWrapper = Backbone.View.extend({
     show: function (force) {
-        this.$el.show();
-        this.$('.close').toggle(!force);
-        this.$('#payment-notify').toggle( !! force);
-        _gaq.push(['_trackEvent', 'signup-form', force ? 'auto' : 'manual']);
-    },
-    hide: function () {
-        this.$el.hide();
-        _gaq.push(['_trackEvent', 'signup-form-close']);
-    },
-    buyReset: function () {
-        StripeCheckout.open({
-            key: 'pk_test_UISfg44mvvob3QnCVacGMQQc',
-            address: false,
-            amount: 200,
-            name: 'PageRank Lookup Limit Reset',
-            description: '10 additional Google Pagerank Lookups',
-            panelLabel: 'Checkout',
-            token: this.getTokenHandler(this.PLAN_RESET)
+        this.$el.modal({
+            //backdrop: !force,
+            keyboard: !force
         });
-        _gaq.push(['_trackEvent', 'purchase-click', this.PLAN_RESET]);
-        return false;
+        this.$('.close').toggle(!force);
+        //this.$('#payment-notify').toggle( !! force);
+        _gaq.push(['_trackEvent', 'signup-form', force ? 'auto' : 'manual']);
+        this.$el.on('hide', function () {
+            _gaq.push(['_trackEvent', 'signup-form-close']);
+        });
     },
-    paygoSignup: function () {
-        _gaq.push(['_trackEvent', 'purchase-click', this.PLAN_PAYGO]);
-        alert('Thanks for your interest, this option will be avaliable soon!\nIn the meanwhile, please try out the 10 for $2 option');
-        return false;
+    render: function () {
+        this.$('#signup-inner').html('<iframe id="signup-frame" name="signup-frame" src="' + config.SECURE_SITE + '/signup.html" scrolling="no" frameborder="0" seamless></iframe>');
+        this.$iframe = this.$('iframe');
+        this.iframe = this.$iframe[0];
     },
-    getTokenHandler: function (plan) {
-        var self = this;
-        return function (stripe_res) {
-            console.log(stripe_res);
-            $.post('/purchase/' + plan, stripe_res)
-                .done(function () {
-                self.hide();
-                self.trigger('purchase');
-                _gaq.push(['_trackEvent', 'purchase-complete', plan]);
-            })
-                .error(self.handleProvisionError);
-            _gaq.push(['_trackEvent', 'purchase', plan]);
-        };
+    remove: function () {
+        this.win.removeEventListener('message', this.handleMessage, false);
     },
-    handleProvisionError: function (data) {
-        var dataStr = "";
-        try {
-            dataStr = JSON.stringify(data);
-        } catch (ex) {}
-        alert('There was an error, please contact us for support.' + (dataStr ? '\nTechnical details: ' + dataStr : ''));
-        _gaq.push(['_trackEvent', 'provision-error', dataStr]);
+    handleMessage: function (event) {
+        // global console:false
+        //console.log('parent message receved', event, JSON.parse(event.data));
+        if (event.origin !== config.SECURE_SITE) return;
+        var data = JSON.parse(event.data);
+        if (data.cmd == 'purchase') {
+            this.trigger('purchase', {
+                plan: data.plan
+            });
+            this.$el.modal('hide');
+        }
+    },
+    sendMessage: function (msg) {
+        this.iframe.contentWindow.postMessage(JSON.stringify(msg), config.SECURE_SITE);
     }
 });
 
-
-var signupView = new SignupView({
+var signupWrapper = new SignupWrapper({
     el: $('#signup')
 });
-
+signupWrapper.render();
+window.addEventListener('message', _.bind(signupWrapper.handleMessage, signupWrapper), false);
 
 // this one isn't worth making a view for
 $('#signup-link').click(function () {
-    signupView.show(false);
+    signupWrapper.show(false);
     return false;
 });
 
@@ -281,7 +257,7 @@ var ResultsList = Backbone.View.extend({
         this.errContainer = this.$('.alert-error');
         this.errBody = this.$('.alert-error p');
 
-        this.listenTo(signupView, 'purchase', this.retry);
+        this.listenTo(signupWrapper, 'purchase', this.retry);
     },
 
     show: function () {
@@ -321,7 +297,7 @@ var ResultsList = Backbone.View.extend({
     error: function (model, data) {
         this.failed_model = model;
         if (data.status == 403) {
-            signupView.show(true);
+            signupWrapper.show(true);
         } else {
             var msg;
             if (data && typeof data.error == "string") {
