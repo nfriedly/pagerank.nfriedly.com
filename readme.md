@@ -16,17 +16,16 @@ environment variables. The `REDISCLOUD_URL` variable should be in the form of:
 Todo:
 -----
 
+* Add multi-url form
 * Better support for error states - don't loose the current URL
-* Get a domain name
 * Add partial support for legacy bookmarklett (pr, but no history), add analytics to legacy bookmarklett
+* Improve responsiveness for small screens
 * Redirect old pr app to new one
 * Add pay-as-you-go plan & user accounts
-* Uses requirejs or something similar to organize client-side js
-* Move google analytics out of core classes
-* Reduce coupling
 * Add no-js warning
 * Add support for multiple values at different dates
 * Lots of unit tests
+* Accept bitcoin
 
 
 GPLv3 License:

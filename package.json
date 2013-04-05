@@ -18,6 +18,9 @@
     "grunt-contrib-jshint": "~0.3.0",
     "grunt-jsbeautifier": "~0.1.6",
     "grunt-contrib-watch": "~0.3.1",
-    "grunt-express": "~0.3.2"
+    "grunt-express": "~0.3.2",
+    "grunt-browserify2": "~0.1.5",
+    "backbone": "~1.0.0",
+    "underscore": "~1.4.4"
   }
 }
