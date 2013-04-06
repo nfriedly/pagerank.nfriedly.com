@@ -37,8 +37,8 @@ var FormView = Backbone.View.extend({
             pr = new PageRank({
                 id: id
             });
-            pr.fetch();
             this.collection.add(pr);
+            pr.fetch();
         }
     }
 });

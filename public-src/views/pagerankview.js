@@ -15,29 +15,54 @@ var PageRankView = Backbone.View.extend({
         this.listenTo(this.model, "change", this.render);
         this.listenTo(this.model, "flash", this.flash);
         this.listenTo(this.model, "remove", this.remove);
+        this.listenTo(this.model, "sync", this.sync);
+        this.listenTo(this.model, "request", this.request);
+        this.listenTo(this.model, "error", this.error);
     },
 
-    template: _.template('<div class="prbar"><div class="prbar-inner" style="width: <%= (+pagerank || 0)  * 10 %>%"></div></div>' + ' - <%= pagerank %> - <a href="<%= url %>"><%= url %></a> ' + '<button type="button" class="refresh btn btn-success">Refresh</button>' + '<button type="button" class="delete btn btn-danger">&times;</button>'),
+    prBarTemplate: _.template('<div class="prbar"><div class="prbar-inner" style="width: <%= (+pagerank || 0)  * 10 %>%"></div></div> - <%= pagerank %> -'),
+
+    template: _.template('<div class="status"><%= status %></div> <a href="<%= url %>"><%= url %></a> <button type="button" class="refresh btn btn-success">Refresh</button> <button type="button" class="delete btn btn-danger">&times;</button>'),
 
     render: function () {
-        var pr = this.model.get('pagerank');
-        if (pr === undefined) {
-            pr = "Loading...";
-            this.$el.addClass('loading');
-        } else {
-            this.$el.removeClass('loading');
-        }
-        if (pr === null) {
-            pr = "Not ranked";
-        }
         this.$el.html(this.template({
-            pagerank: pr,
+            status: this.getStatus(),
             url: this.model.get('id')
         }));
-
         this.flash();
-
         return this;
+    },
+
+
+    getStatus: function () {
+        var pr = this.model.get('pagerank');
+        if (pr === undefined) {
+            return "Unknown";
+        } else if (pr === null) {
+            return "Not ranked";
+        } else {
+            return this.prBarTemplate({
+                pagerank: pr
+            });
+        }
+    },
+
+    setStatus: function (status) {
+        this.$('.status').html(status);
+    },
+
+    request: function () {
+        this.setStatus('Loading...');
+        //this.$el.addClass('loading');
+    },
+
+    sync: function () {
+        //this.$el.removeClass('loading');
+        this.render();
+    },
+
+    error: function (model, response) {
+        this.setStatus(response && response.status == 403 ? 'Pending...' : 'Error');
     },
 
     flash: function (times) {
@@ -50,7 +75,6 @@ var PageRankView = Backbone.View.extend({
     },
 
     refresh: function () {
-        this.model.set('pagerank', undefined);
         this.model.fetch();
     },
 

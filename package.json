@@ -1,7 +1,7 @@
 {
   "name": "pagerank.nfriedly.com",
   "description": "google pagerank lookup app",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "dependencies": {
     "express": "3.x",
     "pagerank": "1.x.x",

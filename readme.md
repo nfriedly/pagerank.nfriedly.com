@@ -17,15 +17,19 @@ Todo:
 -----
 
 * Add multi-url form
-* Better support for error states - don't loose the current URL
 * Add partial support for legacy bookmarklett (pr, but no history), add analytics to legacy bookmarklett
 * Improve responsiveness for small screens
 * Redirect old pr app to new one
 * Add pay-as-you-go plan & user accounts
+* Hide add for paying users
+* Add retry button to error dialog
+* Add "refresh all" button
+* Start recording historical values
 * Add no-js warning
-* Add support for multiple values at different dates
 * Lots of unit tests
+* Add way to view historical values
 * Accept bitcoin
+* Internationalization
 
 
 GPLv3 License:

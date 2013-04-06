@@ -3,18 +3,19 @@ var Backbone = require('backbone');
 var DeletedAlert = require('./deletedalert');
 var PageRankView = require('./pagerankview');
 
+//var PageRank = require('../models/pagerank');
+
 var ResultsList = Backbone.View.extend({
     collection: null,
     list: null,
     visible: false,
     views: null,
-    signupView: null,
 
     events: {
         "click a.close": "hideError"
     },
 
-    initialize: function (options) {
+    initialize: function ( /*options*/ ) {
         this.views = {};
         this.list = this.$('ul');
 
@@ -29,8 +30,6 @@ var ResultsList = Backbone.View.extend({
         this.errContainer = this.$('.alert-error');
         this.errBody = this.$('.alert-error p');
 
-        this.signupView = options.signupView;
-        this.listenTo(this.signupView, 'purchase', this.retry);
     },
 
     show: function () {
@@ -54,37 +53,23 @@ var ResultsList = Backbone.View.extend({
         delete this.views[model];
     },
 
-    retry: function () {
-        var pr = this.failed_model;
-        if (pr) {
-            pr.fetch();
-            this.addOne(pr);
-            delete this.failed_model;
-        }
-    },
-
     hideError: function () {
         this.errContainer.slideUp();
     },
 
     error: function (model, data) {
-        this.failed_model = model;
-        if (data.status == 403) {
-            this.signupView.show(true); // todo: decouple this
-        } else {
-            var msg;
-            if (data && typeof data.error == "string") {
-                msg = data.error;
-            } else {
-                msg = "Error communicating with server, please refresh the page and try again in a few minutes";
-            }
-            this.errBody.text(msg);
-            this.errContainer.fadeIn();
-            if (window.console && window.console.error) {
-                window.console.error(msg, data, model);
-            }
+        // signupView will handle this one
+        if (data && data.status == 403) {
+            return;
         }
-        this.collection.remove(model.id);
+        var msg;
+        if (data && typeof data.error == "string") {
+            msg = data.error;
+        } else {
+            msg = "Error communicating with server, please refresh the page and try again in a few minutes";
+        }
+        this.errBody.text(msg);
+        this.errContainer.fadeIn();
     },
 
     handleDestroy: function (model) {

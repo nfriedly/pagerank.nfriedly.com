@@ -1,7 +1,6 @@
 var path = require('path');
 
 module.exports = function (grunt) {
-    'use strict';
 
     var serverScripts = ['*.js'];
     var clientScripts = ['public-src/**/*.js'];
@@ -77,9 +76,8 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-browserify2');
 
     // Default task(s).
-    grunt.registerTask('default', ['jsbeautifier', 'jshint', 'browserify2:dev', 'express', 'express-keepalive']);
-
-    grunt.registerTask('dev', ['jsbeautifier', 'jshint', 'browserify2:dev', 'express', 'watch']);
+    //grunt.registerTask('default', ['jsbeautifier', 'jshint', 'browserify2:dev', 'express', 'express-keepalive']);
+    grunt.registerTask('default', ['jsbeautifier', 'jshint', 'browserify2:dev', 'express', 'watch']);
 
     grunt.registerTask('compile', ['jsbeautifier', 'jshint', 'browserify2:compile']);
 

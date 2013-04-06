@@ -3,15 +3,17 @@ var Backbone = require('backbone');
 
 var PageRank = Backbone.Model.extend({
     //collection: PageRanks, // this is a circular reference
-    pagerank: undefined,
-    timestamp: null,
-    source: null,
+    pending: false,
     initialize: function (attrs /*, options*/ ) {
         if (typeof attrs.timestamp == "string") {
             attrs.timestamp = new Date(attrs.timestamp);
         }
         this.set('timestamp', attrs.timestamp || new Date());
         this.set('id', this.normalize(attrs.id || ""));
+        this.status = (attrs.pagerank === undefined) ? PageRank.NOT_LOADED : PageRank.LOADED;
+
+        this.on('error', this.handleError);
+        this.on('request', this.notPending);
     },
 
     normalize: function (url) {
@@ -39,6 +41,7 @@ var PageRank = Backbone.Model.extend({
     parse: function (response) {
         // response is already parsed to JSON by jQuery because of the content-type headers
         if (response.error) {
+            this.status = PageRank.NOT_LOADED;
             this.trigger('error', this, response);
             throw response;
         }
@@ -50,6 +53,15 @@ var PageRank = Backbone.Model.extend({
             response.timestamp = new Date();
         }
         return response;
+    },
+
+    handleError: function (model, response) {
+        this.pending = (response && response.status == 403);
+    },
+
+    notPending: function () {
+        this.pending = false;
     }
 });
+
 module.exports = PageRank;

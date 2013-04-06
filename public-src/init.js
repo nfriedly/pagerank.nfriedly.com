@@ -29,7 +29,8 @@ function app() {
 
     var SignupWrapper = require('./views/signupwrapper');
     var signupWrapper = new SignupWrapper({
-        el: $('#signup')
+        el: $('#signup'),
+        collection: pageRanks
     });
     signupWrapper.render();
     // message passing
@@ -50,8 +51,7 @@ function app() {
     var ResultsList = require('./views/resultslist');
     new ResultsList({
         el: $('#results'),
-        collection: pageRanks,
-        signupView: signupWrapper
+        collection: pageRanks
     });
 
     var FormView = require('./views/formview');

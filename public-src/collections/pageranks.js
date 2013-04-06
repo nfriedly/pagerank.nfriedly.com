@@ -1,11 +1,13 @@
 var Backbone = require('backbone');
+var _ = require('underscore');
+
 var PageRank = require('../models/pagerank');
 
 var PageRanks = Backbone.Collection.extend({
     model: PageRank,
 
     initialize: function () {
-        //this.on("add", this.save); - only want to save when we have results back from the server
+        this.on("add", this.save);
         this.on("change", this.save);
         this.on('remove', this.save);
     },
@@ -23,6 +25,16 @@ var PageRanks = Backbone.Collection.extend({
     comparator: function (model) {
         // sorts by age, oldest first (the view adds new items to the top of the list, so oldest-first works)
         return model.get('timestamp').getTime();
+    },
+
+    reloadPending: function () {
+        var pendingModels = this.filter(function (model) {
+            return model.pending;
+        });
+        // todo: improve the logic here to put some delay in-between fetches
+        _.each(pendingModels, function (model) {
+            model.fetch();
+        });
     }
 });
 module.exports = PageRanks;
