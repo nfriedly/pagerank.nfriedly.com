@@ -18,11 +18,13 @@ var PageRankView = Backbone.View.extend({
         this.listenTo(this.model, "sync", this.sync);
         this.listenTo(this.model, "request", this.request);
         this.listenTo(this.model, "error", this.error);
+        this.listenTo(this.model, "pending", this.pending);
+        this.listenTo(this.model, "preload", this.preLoad);
     },
 
     prBarTemplate: _.template('<div class="prbar"><div class="prbar-inner" style="width: <%= (+pagerank || 0)  * 10 %>%"></div></div> - <%= pagerank %> -'),
 
-    template: _.template('<div class="status"><%= status %></div> <a href="<%= url %>"><%= url %></a> <button type="button" class="refresh btn btn-success">Refresh</button> <button type="button" class="delete btn btn-danger">&times;</button>'),
+    template: _.template('<div class="status"><%= status %></div> <a href="<%= url %>" target="_blank"><%= url %></a> <div class="buttons"><button type="button" class="refresh btn btn-success">Refresh</button> <button type="button" class="delete btn btn-danger">&times;</button></div>'),
 
     render: function () {
         this.$el.html(this.template({
@@ -47,12 +49,16 @@ var PageRankView = Backbone.View.extend({
         }
     },
 
+    loadingTemplate: '<div class="progress progress-striped active"><div class="bar" style="width: 100%;"></div></div>',
+    pendingTemplate: '<div class="progress progress-striped"><div class="bar" style="width: 100%;"></div></div>',
+
     setStatus: function (status) {
+
         this.$('.status').html(status);
     },
 
     request: function () {
-        this.setStatus('Loading...');
+        this.setStatus(this.loadingTemplate);
         //this.$el.addClass('loading');
     },
 
@@ -62,10 +68,10 @@ var PageRankView = Backbone.View.extend({
     },
 
     error: function (model, response) {
-        this.setStatus(response && response.status == 403 ? 'Pending...' : 'Error');
+        this.setStatus(response && response.status == 403 ? this.loadingTemplate : 'Error');
     },
 
-    flash: function (times) {
+    flash: function (model, times) {
         times = times || 1;
         var $el = this.$el;
         $el.addClass('flash');
@@ -78,10 +84,18 @@ var PageRankView = Backbone.View.extend({
         this.model.fetch();
     },
 
+    pending: function () {
+        this.setStatus(this.pendingTemplate);
+    },
+
+    preLoad: function () {
+        this.setStatus(this.loadingTemplate);
+    },
+
     destroy: function () {
-        // we don't want to actually destroy the model, just remove it from the colection
-        this.model.trigger('destroy', this.model);
-        this.remove();
+        // we don't want to actually destroy the model, just remove it from the collection 
+        // (and hand it over to the 'undo' view)
+        this.model.collection.remove(this.model.get('id'));
     }
 });
 

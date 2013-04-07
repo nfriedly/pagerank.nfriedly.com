@@ -42,7 +42,7 @@ var SignupWrapper = Backbone.View.extend({
                 plan: data.plan
             });
             this.$el.modal('hide');
-            this.collection.reloadPending();
+            this.collection.lookupPending();
         }
     },
     sendMessage: function (msg) {

@@ -36,17 +36,43 @@ src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
 
 	<div class="jumbotron">
 
-		<form id="lookup-form" action="/pagerank" class="form-inline container">
-		
-			<span class="btn-large">URL:</span>
-			<div class="input-append">
-			  <input type="text" id="url" name="url" class="input-xlarge btn-large span9" placeholder="http://example.com/"autofocus>
-			  <button id="lookup" class="btn btn-primary btn-large">Lookup</button>
+		<form id="lookup-form" action="/pagerank" class="form-horizontal container">
+			<div class="single">
+				<div class="control-group">
+					<label class="control-label" for="url">URL:</label>
+					<div class="controls">
+						<div class="input-append">
+							<input type="text" id="url" name="url" class="input-xlarge btn-large" placeholder="http://example.com/"autofocus>
+					  		<button id="lookup" class="btn btn-primary btn-large">Lookup</button>
+					  	</div>
+					</div>
+				</div>
+				<div class="control-group">
+					<div class="controls">
+						<a href="#" class="multimodetoggle">Expand form</a>
+					</div>
+				</div>
+			</div>
+			<div class="multi" style="display:none">
+				<div class="multi control-group">
+					<label class="control-label" for="urls">URLs:</label>
+					<div class="controls">
+						<textarea id="urls" rows="10" name="urls" class="input-xlarge btn-large"></textarea>
+					</div>
+				</div>
+				<div class="control-group">
+					<div class="controls">
+						<button id="multilookup" class="btn btn-primary btn-large">Lookup</button>
+						<a href="#" class="multimodetoggle">Shrink form</a>
+						<small class="limit-note">Note: The first 10 lookups are free, additional lookups require a purchase.</small>
+					</div>
+				</div>
 			</div>
 		</form>
     
     	<div class="container">
 			<section id="results">
+				<a href="#" class="refresh-all">Refresh All</a>
 				<h2>Results</h2>
 				<div class="alert alert-error" style="display:none"><a class="close">×</a>
 <strong>Error</strong><p>Nevermind, carry on...</p></div>

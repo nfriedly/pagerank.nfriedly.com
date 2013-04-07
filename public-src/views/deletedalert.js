@@ -19,7 +19,6 @@ var DeletedAlert = Backbone.View.extend({
 
     undo: function () {
         this.collection.add(this.model);
-        this.collection.save();
         this.remove();
     }
 });

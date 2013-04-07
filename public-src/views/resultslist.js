@@ -1,9 +1,9 @@
 var Backbone = require('backbone');
+//var _ = require('underscore');
 
 var DeletedAlert = require('./deletedalert');
 var PageRankView = require('./pagerankview');
 
-//var PageRank = require('../models/pagerank');
 
 var ResultsList = Backbone.View.extend({
     collection: null,
@@ -12,7 +12,8 @@ var ResultsList = Backbone.View.extend({
     views: null,
 
     events: {
-        "click a.close": "hideError"
+        "click a.close": "hideError",
+        "click a.refresh-all": "refreshAll"
     },
 
     initialize: function ( /*options*/ ) {
@@ -21,7 +22,8 @@ var ResultsList = Backbone.View.extend({
 
         this.listenTo(this.collection, 'add', this.addOne);
         this.listenTo(this.collection, 'error', this.error);
-        this.listenTo(this.collection, 'destroy', this.handleDestroy);
+        this.listenTo(this.collection, 'remove', this.remove);
+        this.listenTo(this.collection, 'moveToTop', this.moveToTop);
 
         if (this.collection.models.length) {
             this.collection.each(this.addOne, this);
@@ -45,12 +47,12 @@ var ResultsList = Backbone.View.extend({
             model: pr
         });
         this.list.prepend(view.render().el);
-        this.views[pr] = view;
+        this.views[pr.id] = view;
     },
 
     removeOne: function (model) {
-        this.views[model].remove();
-        delete this.views[model];
+        this.views[model.id].remove();
+        delete this.views[model.id];
     },
 
     hideError: function () {
@@ -72,12 +74,26 @@ var ResultsList = Backbone.View.extend({
         this.errContainer.fadeIn();
     },
 
-    handleDestroy: function (model) {
+    remove: function (model) {
         new DeletedAlert({
             model: model,
             collection: this.collection
         }).render().insertAfter(this.$('h2'));
-        this.collection.remove(model.get('id')); // todo: check if this is necessary - it should be automatic
+    },
+
+    moveToTop: function (model) {
+        var view = this.views[model.id];
+        var el = view.$el.detach();
+        this.list.prepend(el);
+        view.$el.hide().slideDown();
+    },
+
+    refreshAll: function (event) {
+        event.preventDefault();
+        this.collection.each(function (model) {
+            model.setPending(true);
+        });
+        this.collection.lookupPending();
     }
 });
 

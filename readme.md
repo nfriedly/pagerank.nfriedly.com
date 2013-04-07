@@ -16,14 +16,12 @@ environment variables. The `REDISCLOUD_URL` variable should be in the form of:
 Todo:
 -----
 
-* Add multi-url form
 * Add partial support for legacy bookmarklett (pr, but no history), add analytics to legacy bookmarklett
 * Improve responsiveness for small screens
 * Redirect old pr app to new one
 * Add pay-as-you-go plan & user accounts
 * Hide add for paying users
 * Add retry button to error dialog
-* Add "refresh all" button
 * Start recording historical values
 * Add no-js warning
 * Lots of unit tests

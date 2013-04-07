@@ -26,8 +26,9 @@ var PageRank = Backbone.Model.extend({
         return url;
     },
 
+    // less than a day old & with a defined pagerank
     newish: function () {
-        return (this.age() <= 24 * 60 * 60);
+        return (this.age() <= 24 * 60 * 60) && this.get('pagerank') !== undefined;
     },
 
     age: function () {
@@ -60,7 +61,18 @@ var PageRank = Backbone.Model.extend({
     },
 
     notPending: function () {
-        this.pending = false;
+        this.setPending(false);
+    },
+
+    setPending: function (pending) {
+        this.pending = !! pending;
+        if (this.pending) {
+            this.trigger('pending');
+        }
+    },
+
+    flash: function (duration) {
+        this.trigger('flash', this, duration || 3);
     }
 });
 
