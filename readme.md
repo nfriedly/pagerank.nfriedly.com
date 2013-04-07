@@ -18,6 +18,7 @@ Todo:
 
 * Add partial support for legacy bookmarklett (pr, but no history), add analytics to legacy bookmarklett
 * Improve responsiveness for small screens
+* Split public/ into public-dev/ & public-prod/
 * Redirect old pr app to new one
 * Add pay-as-you-go plan & user accounts
 * Hide add for paying users

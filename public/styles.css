@@ -1,4 +1,4 @@
-#lookup-form label {font-size:18.75px; padding: 11px 0; width: 57px; text-aligh:left;}
+#lookup-form label {font-size:18.75px; padding: 11px 0; width: 57px; text-align:left;}
 #lookup-form .controls {margin-left: 79px;}
 #lookup-form .input-append { width: 100%; }
 #lookup-form input {width: -moz-calc(100% - 101px); width: -webkit-calc(100% - 101px); width: -o-calc(100% - 101px); width: calc(100% - 101px);}
