@@ -10,7 +10,7 @@ input.btn-large {height:42px;}
 #results {display: none;}
 #results .refresh-all {float:right; line-height:40px; margin:10px 0}
 #results ul, #results ul li {list-style-type: none; margin-left: 1px;padding-left: 0;}
-#results li div.status {display: inline-block; width: 5.1em;}
+#results li .status {display: inline-block; width: 5.1em;}
 #results .progress {height: 14px; margin-right: 5px; margin-bottom: 0; position: relative; top: 1px; }
 #results li button { margin-left:1em;}
 #results li {line-height: 28px; position: relative;}
@@ -32,11 +32,7 @@ input.btn-large {height:42px;}
 .footer {padding:4em 0;}
 
 .alert-delete .btn {margin-left: 1em;}
-.popup #lookup-form, .popup .about, .popup .brand span, .popup #results h2, .popup #results li, .popup footer {display: none;}
-.popup #results li:first-child {display: inline}
-.popup #results ul { padding-top: 1.5em; padding-left: 1em; }
-.popup .jumbotron { padding: 0 0 1em;}
-.popup .container { width:100% }
+
 #signup.modal {width:800px; margin-left:-400px;}
 #signup-inner {max-height:600px;}
 #signup iframe {height: 500px; width: 100%;}

@@ -44,6 +44,13 @@ module.exports = function (grunt) {
                 }
             }
         },
+        csslint: {
+            options: {
+                ids: false,
+                "overqualified-elements": false
+            },
+            files: ['public/*.css']
+        },
         express: {
             pagerank_app: {
                 options: {
@@ -72,12 +79,13 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-jsbeautifier');
     grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-contrib-csslint');
     grunt.loadNpmTasks('grunt-express');
     grunt.loadNpmTasks('grunt-browserify2');
 
     // Default task(s).
     //grunt.registerTask('default', ['jsbeautifier', 'jshint', 'browserify2:dev', 'express', 'express-keepalive']);
-    grunt.registerTask('default', ['jsbeautifier', 'jshint', 'browserify2:dev', 'express', 'watch']);
+    grunt.registerTask('default', ['jsbeautifier', 'jshint', 'csslint', 'browserify2:dev', 'express', 'watch']);
 
     grunt.registerTask('compile', ['jsbeautifier', 'jshint', 'browserify2:compile']);
 

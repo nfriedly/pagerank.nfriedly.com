@@ -9,7 +9,7 @@ var Bookmarklett = Backbone.View.extend({
     },
 
     initialize: function () {
-        this.el.href = "javascript:void(window.open('http://" + location.host + "/#'+location.hostname+location.pathname, 'pagerank', 'scrollbars=1,width=450,height=200'))";
+        this.el.href = "javascript:void(window.open('http://" + location.host + "/#'+location.hostname+location.pathname, 'pagerank', 'scrollbars=1,width=514,height=480'))";
     },
 
     handleClick: function (event) {

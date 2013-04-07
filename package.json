@@ -21,6 +21,7 @@
     "grunt-express": "~0.3.2",
     "grunt-browserify2": "~0.1.5",
     "backbone": "~1.0.0",
-    "underscore": "~1.4.4"
+    "underscore": "~1.4.4",
+    "grunt-contrib-csslint": "~0.1.2"
   }
 }
