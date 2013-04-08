@@ -75,12 +75,12 @@ function getPr(req, res) {
     });
 }
 
-app.get('/pagerank', checkAuth, function (req, res) {
+app.get('/api/pagerank', checkAuth, function (req, res) {
     getPr(req, res, false);
 });
 
 
-app.post('/purchase/reset', function (req, res) {
+app.post('/api/purchase/reset', function (req, res) {
     console.log(req.body);
     stripe.charges.create({
         amount: 200,

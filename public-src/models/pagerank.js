@@ -36,7 +36,7 @@ var PageRank = Backbone.Model.extend({
     },
 
     url: function () {
-        return 'pagerank?url=' + this.id;
+        return '/api/pagerank?url=' + this.id;
     },
 
     parse: function (response) {

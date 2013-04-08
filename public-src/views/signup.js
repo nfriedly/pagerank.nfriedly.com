@@ -30,7 +30,7 @@ var SignupView = Backbone.View.extend({
         return false;
     },
     handleStripeToken: function (plan, stripe_res) {
-        $.post('/purchase/' + plan, stripe_res)
+        $.post('/api/purchase/' + plan, stripe_res)
             .done(_.bind(this.handleProvision, this, plan))
             .fail(_.bind(this.handleProvisionError, this));
         this.trigger('purchase', plan);
