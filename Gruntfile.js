@@ -156,6 +156,9 @@ module.exports = function (grunt) {
                 stderr: true,
                 failOnError: true
             },
+            'git-commit-public': {
+                command: 'git commit public/ -m "committing public files for deployment: "' + (new Date())
+            },
             'heroku-push': {
                 command: 'git push heroku'
             },
@@ -229,7 +232,7 @@ module.exports = function (grunt) {
 
     grunt.registerTask('predeploy', ['clean:pre-deploy', 'jsbeautifier', 'jshint', 'csslint', 'copy:prod', 'build-html', 'cssmin:prod', 'browserify2:compile', 'uglify:prod']);
 
-    grunt.registerTask('deploy', ['predeploy', 'shell:heroku-push', 'shell:github-push', 's3', 'clean:post-deploy']);
+    grunt.registerTask('deploy', ['predeploy', 'shell:git-commit-public', 'shell:heroku-push', 'shell:github-push', 's3', 'clean:post-deploy']);
 
     grunt.registerTask('pretty', 'jsbeautifier'); // I always misspell "jsbeautifier"
 };
