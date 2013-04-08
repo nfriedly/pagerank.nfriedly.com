@@ -70,7 +70,7 @@ module.exports = function (grunt) {
             },
             compile: {
                 entry: './public-src/init.js',
-                compile: './public-tmp/pr-client.js'
+                compile: './public/pr-client-full.js'
             }
         },
 
@@ -94,6 +94,14 @@ module.exports = function (grunt) {
                     src: ['*.{jpg,png}'], // in prod, the css & html are run through a minifier
                     dest: 'public/'
                 }]
+            },
+            'prod-html-bandaid': {
+                files: [{
+                    expand: true,
+                    cwd: 'public-tmp/',
+                    src: ['*.html'], // in prod, the css & html are run through a minifier
+                    dest: 'public/'
+                }]
             }
         },
 
@@ -113,6 +121,8 @@ module.exports = function (grunt) {
                 }]
             }
         },
+
+        /* htmlmin strips the space between text and links :( At least gzip will fix most of the issue... 
         htmlmin: {
             prod: {
                 files: {
@@ -126,6 +136,7 @@ module.exports = function (grunt) {
                 }
             }
         },
+        */
 
 
         cssmin: {
@@ -142,10 +153,11 @@ module.exports = function (grunt) {
             prod: {
                 options: {
                     sourceMap: 'public/pr-client-source-map.js',
-                    sourceMappingURL: '/pr-client-source-map.js'
+                    sourceMappingURL: '/pr-client-source-map.js',
+                    sourceMapPrefix: 1 // drop this many directories from the url to the original source files
                 },
                 files: {
-                    'public/pr-client.js': 'public-tmp/pr-client.js'
+                    'public/pr-client.js': 'public/pr-client-full.js'
                 }
             }
         },
@@ -157,7 +169,7 @@ module.exports = function (grunt) {
                 failOnError: true
             },
             'git-commit-public': {
-                command: 'git commit public/ -m "committing public files for deployment: "' + (new Date())
+                command: 'git commit public/ -m "committing public files for deployment: ' + (new Date()) + '"'
             },
             'heroku-push': {
                 command: 'git push heroku'
@@ -219,7 +231,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-replace');
-    grunt.loadNpmTasks('grunt-contrib-htmlmin');
+    //grunt.loadNpmTasks('grunt-contrib-htmlmin');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-shell');
@@ -228,7 +240,8 @@ module.exports = function (grunt) {
     // Default task(s).
     grunt.registerTask('default', ['clean:pre-deploy', 'jsbeautifier', 'jshint', 'csslint', 'copy:dev', 'browserify2:dev', 'express', 'watch']);
 
-    grunt.registerTask('build-html', ['replace:prod', 'htmlmin:prod']);
+    /*'htmlmin:prod'*/
+    grunt.registerTask('build-html', ['replace:prod', 'copy:prod-html-bandaid']);
 
     grunt.registerTask('predeploy', ['clean:pre-deploy', 'jsbeautifier', 'jshint', 'csslint', 'copy:prod', 'build-html', 'cssmin:prod', 'browserify2:compile', 'uglify:prod']);
 

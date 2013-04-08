@@ -16,12 +16,14 @@ environment variables. The `REDISCLOUD_URL` variable should be in the form of:
 Todo:
 -----
 
-* Automatic deploy process
-* CDN to combine s3 & heroku into a single domain
+* Fix or disable html minification
+* auto beautify html
 * Add partial support for legacy bookmarklett (pr, but no history), add analytics to legacy bookmarklett
 * Redirect old pr app to new one
+* Consider adding a uservoice wid
 * Add pay-as-you-go plan & user accounts
 * Hide add for paying users
+* Add some cool icons
 * Add retry button to error dialog
 * Start recording historical values
 * Add no-js warning
