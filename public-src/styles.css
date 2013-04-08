@@ -8,7 +8,7 @@ input.btn-large {height:42px;}
 .limit-note { float: right; }
 
 #results {display: none;}
-#results .refresh-all {float:right; line-height:40px; margin:10px 0}
+#results .refresh-all {float:right; line-height:40px; margin-top:10px;}
 #results ul, #results ul li {list-style-type: none; margin-left: 1px;padding-left: 0;}
 #results li .status {display: inline-block; width: 5.1em;}
 #results .progress {height: 14px; margin-right: 5px; margin-bottom: 0; position: relative; top: 1px; }

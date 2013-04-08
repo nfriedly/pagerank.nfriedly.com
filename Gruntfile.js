@@ -12,7 +12,7 @@ module.exports = function (grunt) {
         watch: {
             scripts: {
                 files: allScripts,
-                tasks: ['jshint', 'browserify2:dev', 'express-restart']
+                tasks: ['jshint', 'browserify2:dev', 'copy:dev', 'express-restart']
             }
         },
         jsbeautifier: {
@@ -49,7 +49,7 @@ module.exports = function (grunt) {
                 ids: false,
                 "overqualified-elements": false
             },
-            files: ['public/*.css']
+            files: ['public-src/*.css']
         },
         express: {
             pagerank_app: {
@@ -70,9 +70,94 @@ module.exports = function (grunt) {
             },
             compile: {
                 entry: './public-src/init.js',
-                compile: './public/pr-client.js'
+                compile: './public-tmp/pr-client.js'
             }
-        }
+        },
+
+        clean: {
+            'pre-deploy': 'public',
+            'post-deploy': 'public-tmp'
+        },
+        copy: {
+            dev: {
+                files: [{
+                    expand: true,
+                    cwd: 'public-src/',
+                    src: ['*.{jpg,png,css,html}'],
+                    dest: 'public/'
+                }]
+            },
+            prod: {
+                files: [{
+                    expand: true,
+                    cwd: 'public-src/',
+                    src: ['*.{jpg,png}'], // in prod, the css & html are run through a minifier
+                    dest: 'public/'
+                }]
+            }
+        },
+
+        replace: {
+            prod: {
+                options: {
+                    variables: {
+                        'timestamp': '<%= (new Date()).getTime() %>'
+                    },
+                    prefix: '@@'
+                },
+                files: [{
+                    expand: true,
+                    cwd: 'public/',
+                    src: ['*.html'],
+                    dest: 'public-tmp/'
+                }]
+            }
+        },
+        htmlmin: {
+            prod: {
+                files: {
+                    // dest: src
+                    'public/index.html': 'public-tmp/index.html',
+                    'public/signup.html': 'public-tmp/signup.html'
+                },
+                options: {
+                    removeComments: true,
+                    collapseWhitespace: true
+                }
+            }
+        },
+
+
+        cssmin: {
+            prod: {
+                report: 'min',
+                files: {
+                    // dest: src
+                    'public/styles.css': 'public-src/styles.css'
+                }
+            }
+        },
+
+        uglify: {
+            prod: {
+                options: {
+                    sourceMap: 'public/pr-client-source-map.js',
+                    sourceMappingURL: '/pr-client-source-map.js'
+                },
+                files: {
+                    'public/pr-client.js': 'public-tmp/pr-client.js'
+                }
+            }
+        },
+        
+        shell: {
+			'heroku-push': {
+				command: 'git push heroku'
+			},
+			'github-push': {
+				command: 'git push'
+			}
+		}
 
     });
 
@@ -82,11 +167,19 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-csslint');
     grunt.loadNpmTasks('grunt-express');
     grunt.loadNpmTasks('grunt-browserify2');
+    grunt.loadNpmTasks('grunt-contrib-clean');
+    grunt.loadNpmTasks('grunt-contrib-copy');
+    grunt.loadNpmTasks('grunt-replace');
+    grunt.loadNpmTasks('grunt-contrib-htmlmin');
+    grunt.loadNpmTasks('grunt-contrib-cssmin');
+    grunt.loadNpmTasks('grunt-contrib-uglify');
+	grunt.loadNpmTasks('grunt-shell');
 
     // Default task(s).
-    //grunt.registerTask('default', ['jsbeautifier', 'jshint', 'browserify2:dev', 'express', 'express-keepalive']);
-    grunt.registerTask('default', ['jsbeautifier', 'jshint', 'csslint', 'browserify2:dev', 'express', 'watch']);
+    grunt.registerTask('default', ['clean:pre-deploy', 'jsbeautifier', 'jshint', 'csslint', 'copy:dev', 'browserify2:dev', 'express', 'watch']);
 
-    grunt.registerTask('compile', ['jsbeautifier', 'jshint', 'browserify2:compile']);
+    grunt.registerTask('predeploy', ['clean:pre-deploy', 'jsbeautifier', 'jshint', 'csslint', 'copy:prod', 'replace:prod', 'htmlmin:prod', 'cssmin:prod', 'browserify2:compile', 'uglify:prod']);
+
+    grunt.registerTask('deploy', ['predeploy', 'shell:heroku-push', 'shell:github-push', /* s3 upload */ 'clean:post-deploy']);
 
 };
