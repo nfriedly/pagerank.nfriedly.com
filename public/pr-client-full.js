@@ -102,7 +102,7 @@ function signup() {
     });
 }
 
-},{"./collections/pageranks":2,"./views/signupwrapper":3,"./views/resultslist":4,"./views/formview":5,"./views/bookmarklett":6,"./views/signup":7,"underscore":8}],8:[function(require,module,exports){
+},{"./views/signupwrapper":2,"./collections/pageranks":3,"./views/resultslist":4,"./views/formview":5,"./views/bookmarklett":6,"./views/signup":7,"underscore":8}],8:[function(require,module,exports){
 (function(){//     Underscore.js 1.4.4
 //     http://underscorejs.org
 //     (c) 2009-2013 Jeremy Ashkenas, DocumentCloud Inc.
@@ -1418,6 +1418,62 @@ process.chdir = function (dir) {
 
 })(require("__browserify_process"))
 },{"__browserify_process":9}],2:[function(require,module,exports){
+(function(){var Backbone = require('backbone');
+var config = require('../config');
+
+var SignupWrapper = Backbone.View.extend({
+    collection: null,
+
+    initialize: function () {
+        this.listenTo(this.collection, 'error', this.handleModelError);
+    },
+
+    show: function (force) {
+        this.$el.modal({
+            //backdrop: !force,
+            keyboard: !force
+        });
+        this.$('.close').toggle(!force);
+        //this.$('#payment-notify').toggle( !! force);
+        this.trigger('show', force);
+        var self = this;
+        this.$el.on('hide', function () {
+            self.trigger('hide');
+        });
+    },
+    render: function () {
+        this.$('#signup-inner').html('<iframe id="signup-frame" name="signup-frame" src="' + config.SECURE_SITE + '/signup.html" scrolling="no" frameborder="0" seamless></iframe>');
+        this.$iframe = this.$('iframe');
+        this.iframe = this.$iframe[0];
+    },
+    remove: function () {
+        this.win.removeEventListener('message', this.handleMessage, false);
+    },
+    handleModelError: function (model, response) {
+        if (response && response.status == 403) this.show(true);
+    },
+    handleMessage: function (event) {
+        // global console:false
+        //console.log('parent message receved', event, JSON.parse(event.data));
+        if (event.origin !== config.SECURE_SITE) return;
+        var data = JSON.parse(event.data);
+        if (data.cmd == 'purchase') {
+            this.trigger('purchase', {
+                plan: data.plan
+            });
+            this.$el.modal('hide');
+            this.collection.lookupPending();
+        }
+    },
+    sendMessage: function (msg) {
+        this.iframe.contentWindow.postMessage(JSON.stringify(msg), config.SECURE_SITE);
+    }
+});
+
+module.exports = SignupWrapper;
+
+})()
+},{"../config":10,"backbone":11}],3:[function(require,module,exports){
 var Backbone = require('backbone');
 var _ = require('underscore');
 
@@ -1480,63 +1536,7 @@ var PageRanks = Backbone.Collection.extend({
 });
 module.exports = PageRanks;
 
-},{"../models/pagerank":11,"backbone":12,"underscore":8}],3:[function(require,module,exports){
-(function(){var Backbone = require('backbone');
-var config = require('../config');
-
-var SignupWrapper = Backbone.View.extend({
-    collection: null,
-
-    initialize: function () {
-        this.listenTo(this.collection, 'error', this.handleModelError);
-    },
-
-    show: function (force) {
-        this.$el.modal({
-            //backdrop: !force,
-            keyboard: !force
-        });
-        this.$('.close').toggle(!force);
-        //this.$('#payment-notify').toggle( !! force);
-        this.trigger('show', force);
-        var self = this;
-        this.$el.on('hide', function () {
-            self.trigger('hide');
-        });
-    },
-    render: function () {
-        this.$('#signup-inner').html('<iframe id="signup-frame" name="signup-frame" src="' + config.SECURE_SITE + '/signup.html" scrolling="no" frameborder="0" seamless></iframe>');
-        this.$iframe = this.$('iframe');
-        this.iframe = this.$iframe[0];
-    },
-    remove: function () {
-        this.win.removeEventListener('message', this.handleMessage, false);
-    },
-    handleModelError: function (model, response) {
-        if (response && response.status == 403) this.show(true);
-    },
-    handleMessage: function (event) {
-        // global console:false
-        //console.log('parent message receved', event, JSON.parse(event.data));
-        if (event.origin !== config.SECURE_SITE) return;
-        var data = JSON.parse(event.data);
-        if (data.cmd == 'purchase') {
-            this.trigger('purchase', {
-                plan: data.plan
-            });
-            this.$el.modal('hide');
-            this.collection.lookupPending();
-        }
-    },
-    sendMessage: function (msg) {
-        this.iframe.contentWindow.postMessage(JSON.stringify(msg), config.SECURE_SITE);
-    }
-});
-
-module.exports = SignupWrapper;
-
-})()
-},{"../config":10,"backbone":12}],4:[function(require,module,exports){
+},{"../models/pagerank":12,"backbone":11,"underscore":8}],4:[function(require,module,exports){
 var Backbone = require('backbone');
 //var _ = require('underscore');
 
@@ -1638,7 +1638,7 @@ var ResultsList = Backbone.View.extend({
 
 module.exports = ResultsList;
 
-},{"./deletedalert":13,"./pagerankview":14,"backbone":12}],5:[function(require,module,exports){
+},{"./deletedalert":13,"./pagerankview":14,"backbone":11}],5:[function(require,module,exports){
 (function(){/*global alert:false*/
 var Backbone = require('backbone');
 var _ = require('underscore');
@@ -1766,7 +1766,7 @@ var FormView = Backbone.View.extend({
 module.exports = FormView;
 
 })()
-},{"../models/pagerank":11,"backbone":12,"underscore":8}],6:[function(require,module,exports){
+},{"../models/pagerank":12,"backbone":11,"underscore":8}],6:[function(require,module,exports){
 (function(){/*global alert:false*/
 /*jshint scripturl:true*/
 var Backbone = require('backbone');
@@ -1796,7 +1796,7 @@ var Bookmarklett = Backbone.View.extend({
 module.exports = Bookmarklett;
 
 })()
-},{"backbone":12}],7:[function(require,module,exports){
+},{"backbone":11}],7:[function(require,module,exports){
 (function(){/*global $:false, StripeCheckout:false, alert:false */
 var Backbone = require('backbone');
 var _ = require('underscore');
@@ -1875,7 +1875,7 @@ var SignupView = Backbone.View.extend({
 module.exports = SignupView;
 
 })()
-},{"../config":10,"backbone":12,"underscore":8}],11:[function(require,module,exports){
+},{"../config":10,"backbone":11,"underscore":8}],12:[function(require,module,exports){
 var Backbone = require('backbone');
 
 
@@ -1956,7 +1956,7 @@ var PageRank = Backbone.Model.extend({
 
 module.exports = PageRank;
 
-},{"backbone":12}],13:[function(require,module,exports){
+},{"backbone":11}],13:[function(require,module,exports){
 var Backbone = require('backbone');
 var _ = require('underscore');
 
@@ -1983,7 +1983,7 @@ var DeletedAlert = Backbone.View.extend({
 });
 module.exports = DeletedAlert;
 
-},{"underscore":8,"backbone":12}],14:[function(require,module,exports){
+},{"backbone":11,"underscore":8}],14:[function(require,module,exports){
 var Backbone = require('backbone');
 var _ = require('underscore');
 
@@ -2087,7 +2087,7 @@ var PageRankView = Backbone.View.extend({
 
 module.exports = PageRankView;
 
-},{"backbone":12,"underscore":8}],12:[function(require,module,exports){
+},{"backbone":11,"underscore":8}],11:[function(require,module,exports){
 (function(){//     Backbone.js 1.0.0
 
 //     (c) 2010-2013 Jeremy Ashkenas, DocumentCloud Inc.
