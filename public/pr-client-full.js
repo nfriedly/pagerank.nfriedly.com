@@ -102,7 +102,7 @@ function signup() {
     });
 }
 
-},{"./views/signupwrapper":2,"./collections/pageranks":3,"./views/resultslist":4,"./views/formview":5,"./views/bookmarklett":6,"./views/signup":7,"underscore":8}],8:[function(require,module,exports){
+},{"./collections/pageranks":2,"./views/signupwrapper":3,"./views/resultslist":4,"./views/formview":5,"./views/bookmarklett":6,"./views/signup":7,"underscore":8}],8:[function(require,module,exports){
 (function(){//     Underscore.js 1.4.4
 //     http://underscorejs.org
 //     (c) 2009-2013 Jeremy Ashkenas, DocumentCloud Inc.
@@ -1332,148 +1332,25 @@ function signup() {
 
 })()
 },{}],9:[function(require,module,exports){
-// shim for using process in browser
+var isDev = (typeof location != 'undefined' && location.hostname == 'localhost');
 
-var process = module.exports = {};
-
-process.nextTick = (function () {
-    var canSetImmediate = typeof window !== 'undefined'
-    && window.setImmediate;
-    var canPost = typeof window !== 'undefined'
-    && window.postMessage && window.addEventListener
-    ;
-
-    if (canSetImmediate) {
-        return function (f) { return window.setImmediate(f) };
-    }
-
-    if (canPost) {
-        var queue = [];
-        window.addEventListener('message', function (ev) {
-            if (ev.source === window && ev.data === 'process-tick') {
-                ev.stopPropagation();
-                if (queue.length > 0) {
-                    var fn = queue.shift();
-                    fn();
-                }
-            }
-        }, true);
-
-        return function nextTick(fn) {
-            queue.push(fn);
-            window.postMessage('process-tick', '*');
-        };
-    }
-
-    return function nextTick(fn) {
-        setTimeout(fn, 0);
-    };
-})();
-
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-}
-
-// TODO(shtylman)
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
+var devConfig = {
+    STRIPE_KEY: 'pk_test_UISfg44mvvob3QnCVacGMQQc',
+    SITE: 'http://localhost:3000',
+    SECURE_SITE: 'http://localhost:3000'
 };
 
-},{}],10:[function(require,module,exports){
-(function(process){/*globals define:false, module:false, process:false*/
+var prodConfig = {
+    STRIPE_KEY: 'pk_live_jIp2eWrXfTNSUWtDFWMuIiK3', // this is the public ("publishable") key
+    SITE: 'http://pagerank.nfriedly.com',
+    SECURE_SITE: 'https://googlepagerank.herokuapp.com'
+};
 
-(function (root) {
-    'use strict';
+var config = isDev ? devConfig : prodConfig;
 
-    var isDev = (typeof location != 'undefined' && location.hostname == 'localhost') || (typeof process != 'undefined' && process.env.NODE_ENV != 'production');
+module.exports = config;
 
-    var devConfig = {
-        STRIPE_KEY: 'pk_test_UISfg44mvvob3QnCVacGMQQc',
-        SITE: 'http://localhost:3000',
-        SECURE_SITE: 'http://localhost:3000'
-    };
-
-    var prodConfig = {
-        STRIPE_KEY: 'pk_live_jIp2eWrXfTNSUWtDFWMuIiK3', // this is the public ("publishable") key
-        SITE: 'http://pagerank.nfriedly.com',
-        SECURE_SITE: 'https://googlepagerank.herokuapp.com'
-    };
-
-    var config = isDev ? devConfig : prodConfig;
-
-    if (typeof define == 'function') {
-        define('config', [], config);
-    } else if (typeof module != 'undefined') {
-        module.exports = config;
-    } else {
-        root.config = config;
-    }
-})(this);
-
-})(require("__browserify_process"))
-},{"__browserify_process":9}],2:[function(require,module,exports){
-(function(){var Backbone = require('backbone');
-var config = require('../config');
-
-var SignupWrapper = Backbone.View.extend({
-    collection: null,
-
-    initialize: function () {
-        this.listenTo(this.collection, 'error', this.handleModelError);
-    },
-
-    show: function (force) {
-        this.$el.modal({
-            //backdrop: !force,
-            keyboard: !force
-        });
-        this.$('.close').toggle(!force);
-        //this.$('#payment-notify').toggle( !! force);
-        this.trigger('show', force);
-        var self = this;
-        this.$el.on('hide', function () {
-            self.trigger('hide');
-        });
-    },
-    render: function () {
-        this.$('#signup-inner').html('<iframe id="signup-frame" name="signup-frame" src="' + config.SECURE_SITE + '/signup.html" scrolling="no" frameborder="0" seamless></iframe>');
-        this.$iframe = this.$('iframe');
-        this.iframe = this.$iframe[0];
-    },
-    remove: function () {
-        this.win.removeEventListener('message', this.handleMessage, false);
-    },
-    handleModelError: function (model, response) {
-        if (response && response.status == 403) this.show(true);
-    },
-    handleMessage: function (event) {
-        // global console:false
-        //console.log('parent message receved', event, JSON.parse(event.data));
-        if (event.origin !== config.SECURE_SITE) return;
-        var data = JSON.parse(event.data);
-        if (data.cmd == 'purchase') {
-            this.trigger('purchase', {
-                plan: data.plan
-            });
-            this.$el.modal('hide');
-            this.collection.lookupPending();
-        }
-    },
-    sendMessage: function (msg) {
-        this.iframe.contentWindow.postMessage(JSON.stringify(msg), config.SECURE_SITE);
-    }
-});
-
-module.exports = SignupWrapper;
-
-})()
-},{"../config":10,"backbone":11}],3:[function(require,module,exports){
+},{}],2:[function(require,module,exports){
 var Backbone = require('backbone');
 var _ = require('underscore');
 
@@ -1536,7 +1413,63 @@ var PageRanks = Backbone.Collection.extend({
 });
 module.exports = PageRanks;
 
-},{"../models/pagerank":12,"backbone":11,"underscore":8}],4:[function(require,module,exports){
+},{"../models/pagerank":10,"backbone":11,"underscore":8}],3:[function(require,module,exports){
+(function(){var Backbone = require('backbone');
+var config = require('../config');
+
+var SignupWrapper = Backbone.View.extend({
+    collection: null,
+
+    initialize: function () {
+        this.listenTo(this.collection, 'error', this.handleModelError);
+    },
+
+    show: function (force) {
+        this.$el.modal({
+            //backdrop: !force,
+            keyboard: !force
+        });
+        this.$('.close').toggle(!force);
+        //this.$('#payment-notify').toggle( !! force);
+        this.trigger('show', force);
+        var self = this;
+        this.$el.on('hide', function () {
+            self.trigger('hide');
+        });
+    },
+    render: function () {
+        this.$('#signup-inner').html('<iframe id="signup-frame" name="signup-frame" src="' + config.SECURE_SITE + '/signup.html" scrolling="no" frameborder="0" seamless></iframe>');
+        this.$iframe = this.$('iframe');
+        this.iframe = this.$iframe[0];
+    },
+    remove: function () {
+        this.win.removeEventListener('message', this.handleMessage, false);
+    },
+    handleModelError: function (model, response) {
+        if (response && response.status == 403) this.show(true);
+    },
+    handleMessage: function (event) {
+        // global console:false
+        //console.log('parent message receved', event, JSON.parse(event.data));
+        if (event.origin !== config.SECURE_SITE) return;
+        var data = JSON.parse(event.data);
+        if (data.cmd == 'purchase') {
+            this.trigger('purchase', {
+                plan: data.plan
+            });
+            this.$el.modal('hide');
+            this.collection.lookupPending();
+        }
+    },
+    sendMessage: function (msg) {
+        this.iframe.contentWindow.postMessage(JSON.stringify(msg), config.SECURE_SITE);
+    }
+});
+
+module.exports = SignupWrapper;
+
+})()
+},{"../config":9,"backbone":11}],4:[function(require,module,exports){
 var Backbone = require('backbone');
 //var _ = require('underscore');
 
@@ -1638,7 +1571,7 @@ var ResultsList = Backbone.View.extend({
 
 module.exports = ResultsList;
 
-},{"./deletedalert":13,"./pagerankview":14,"backbone":11}],5:[function(require,module,exports){
+},{"./deletedalert":12,"./pagerankview":13,"backbone":11}],5:[function(require,module,exports){
 (function(){/*global alert:false*/
 var Backbone = require('backbone');
 var _ = require('underscore');
@@ -1766,7 +1699,7 @@ var FormView = Backbone.View.extend({
 module.exports = FormView;
 
 })()
-},{"../models/pagerank":12,"backbone":11,"underscore":8}],6:[function(require,module,exports){
+},{"../models/pagerank":10,"backbone":11,"underscore":8}],6:[function(require,module,exports){
 (function(){/*global alert:false*/
 /*jshint scripturl:true*/
 var Backbone = require('backbone');
@@ -1875,7 +1808,7 @@ var SignupView = Backbone.View.extend({
 module.exports = SignupView;
 
 })()
-},{"../config":10,"backbone":11,"underscore":8}],12:[function(require,module,exports){
+},{"../config":9,"backbone":11,"underscore":8}],10:[function(require,module,exports){
 var Backbone = require('backbone');
 
 
@@ -1956,7 +1889,7 @@ var PageRank = Backbone.Model.extend({
 
 module.exports = PageRank;
 
-},{"backbone":11}],13:[function(require,module,exports){
+},{"backbone":11}],12:[function(require,module,exports){
 var Backbone = require('backbone');
 var _ = require('underscore');
 
@@ -1983,7 +1916,7 @@ var DeletedAlert = Backbone.View.extend({
 });
 module.exports = DeletedAlert;
 
-},{"backbone":11,"underscore":8}],14:[function(require,module,exports){
+},{"backbone":11,"underscore":8}],13:[function(require,module,exports){
 var Backbone = require('backbone');
 var _ = require('underscore');
 
@@ -3661,7 +3594,7 @@ module.exports = PageRankView;
 }).call(this);
 
 })()
-},{"underscore":15}],15:[function(require,module,exports){
+},{"underscore":14}],14:[function(require,module,exports){
 (function(){//     Underscore.js 1.4.4
 //     http://underscorejs.org
 //     (c) 2009-2013 Jeremy Ashkenas, DocumentCloud Inc.
