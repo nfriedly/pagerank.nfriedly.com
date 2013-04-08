@@ -1,71 +1,12 @@
-<!doctype html>
-<html>
-<head>
-<title>Signup for the Google PageRank Lookup Tool</title>
-  <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootswatch/2.3.0/superhero/bootstrap.min.css" type="text/css">
-  <link rel="stylesheet" href="/styles.css" type="text/css">
-  
-  <meta name="ROBOTS" content="NOINDEX">
-</head>
-<body>
-
-	<section id="signup" class="container row">
-		<div id="signup-inner">
-			<button class="close">&times;</button>
-			<h2>Payment Options</h2>
-			<div id="payment-notify" class="alert alert-error  hideme"><strong>You have reached the daily limit of the free tier.</strong> Please sign in or choose a payment option.</div>
-			<ul id="payment-options" class="row">
-				<li id="paygo" class="plan span3 disabled">
-					<h3>Unlimited lookups</h3>
-					<p>Pay as you go, only $0.17 per lookup</p>
-					<ul>
-						<li>First 10 lookups per day are free</li>
-						<li>After that, just $0.17 per lookup</li>
-					</ul>
-					<span class="label label-info">Coming soon!</span>
-					<button data-plan="paygo" id="paygo-signup" disabled class="btn btn-primary">Sign Up</button>
-				</li>
-				<li id="reset" class="plan span3">
-					<h3>10 lookups for $2</h3>
-					<p>Reset the daily limit!</p>
-					<ul>
-						<li>No account necessary, your information is not stored</li>
-						<li>Good for 24 hours, after that you get another 10 free lookups</li>
-					</ul>
-					<button data-plan="reset" id="reset-buy" class="btn btn-primary">Buy now</button>
-				</li>
-				<li id="signin" class="span3 disabled">
-					<h3>Sign into your account</h3>
-					<span class="label label-info">Coming soon!</span>
-					<button class="btn btn-primary login" disabled>Log In</button>
-				</li>
-			</ul>
-		</div>
-	</section>
-	
-	  <script>
-  	function addScript(src) {
+<!doctype html><html><head><title>Signup for the Google PageRank Lookup Tool</title><link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootswatch/2.3.0/superhero/bootstrap.min.css" type="text/css"><link rel="stylesheet" href="/styles.css?rel=@@timestamp" type="text/css"><meta name="ROBOTS" content="NOINDEX"></head><body><section id="signup" class="container row"><div id="signup-inner"><button class="close">&times;</button><h2>Payment Options</h2><div id="payment-notify" class="alert alert-error hideme"><strong>You have reached the daily limit of the free tier.</strong>Please sign in or choose a payment option.</div><ul id="payment-options" class="row"><li id="paygo" class="plan span3 disabled"><h3>Unlimited lookups</h3><p>Pay as you go, only $0.17 per lookup</p><ul><li>First 10 lookups per day are free</li><li>After that, just $0.17 per lookup</li></ul><span class="label label-info">Coming soon!</span><button data-plan="paygo" id="paygo-signup" disabled="disabled" class="btn btn-primary">Sign Up</button></li><li id="reset" class="plan span3"><h3>10 lookups for $2</h3><p>Reset the daily limit!</p><ul><li>No account necessary, your information is not stored</li><li>Good for 24 hours, after that you get another 10 free lookups</li></ul><button data-plan="reset" id="reset-buy" class="btn btn-primary">Buy now</button></li><li id="signin" class="span3 disabled"><h3>Sign into your account</h3><span class="label label-info">Coming soon!</span><button class="btn btn-primary login" disabled="disabled">Log In</button></li></ul></div></section><script>function addScript(src) {
   		document.write('<script src="' + src + '"><\/script>');
   	}
   	if (!window.JSON) {
   		addScript('//cdnjs.cloudflare.com/ajax/libs/json3/3.2.4/json3.min.js');
-  	}
-  </script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <script>
-  	var _gaq = _gaq || [];
+  	}</script><script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script><script>var _gaq = _gaq || [];
 	_gaq.push(['_setAccount', 'UA-1735765-25']);
-	_gaq.push(['_trackPageview']);
-  </script>
-  <script src="/pr-client.js"></script>
-  
-  <script type="text/javascript">
-  (function() {
+	_gaq.push(['_trackPageview']);</script><script src="/pr-client.js?rel=@@timestamp"></script><script type="text/javascript">(function() {
     var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
     ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-  </script>
-  <script src="https://checkout.stripe.com/v2/checkout.js"  defer="defer"></script>
-</body>
-</html>
+  })();</script><script src="https://checkout.stripe.com/v2/checkout.js" defer="defer"></script></body></html>
