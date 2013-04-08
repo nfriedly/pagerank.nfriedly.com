@@ -149,15 +149,20 @@ module.exports = function (grunt) {
                 }
             }
         },
-        
+
         shell: {
-			'heroku-push': {
-				command: 'git push heroku'
-			},
-			'github-push': {
-				command: 'git push'
-			}
-		}
+        	options: {
+        		stdout: true,
+        		stderr: true,
+				failOnError: true,
+        	},
+            'heroku-push': {
+                command: 'git push heroku'
+            },
+            'github-push': {
+                command: 'git push'
+            }
+        }
 
     });
 
@@ -173,13 +178,14 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-htmlmin');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-contrib-uglify');
-	grunt.loadNpmTasks('grunt-shell');
+    grunt.loadNpmTasks('grunt-shell');
 
     // Default task(s).
     grunt.registerTask('default', ['clean:pre-deploy', 'jsbeautifier', 'jshint', 'csslint', 'copy:dev', 'browserify2:dev', 'express', 'watch']);
 
     grunt.registerTask('predeploy', ['clean:pre-deploy', 'jsbeautifier', 'jshint', 'csslint', 'copy:prod', 'replace:prod', 'htmlmin:prod', 'cssmin:prod', 'browserify2:compile', 'uglify:prod']);
 
-    grunt.registerTask('deploy', ['predeploy', 'shell:heroku-push', 'shell:github-push', /* s3 upload */ 'clean:post-deploy']);
+    grunt.registerTask('deploy', ['predeploy', 'shell:heroku-push', 'shell:github-push', /* s3 upload */
+    'clean:post-deploy']);
 
 };
