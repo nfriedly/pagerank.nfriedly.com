@@ -1,1 +1,50 @@
-#lookup-form label{font-size:18.75px;padding:11px 0;width:57px;text-align:left}#lookup-form .controls{margin-left:79px}#lookup-form .input-append{width:100%}#lookup-form input{width:-moz-calc(100% - 101px);width:-webkit-calc(100% - 101px);width:-o-calc(100% - 101px);width:calc(100% - 101px)}#lookup-form textarea{width:100%;font-size:16px;line-height:24px}input.btn-large{height:42px}.multi .multimodetoggle,.multi .limit-note{line-height:42px;margin-left:20px}.limit-note{float:right}#results{display:none}#results .refresh-all{float:right;line-height:40px;margin-top:10px}#results ul,#results ul li{list-style-type:none;margin-left:1px;padding-left:0}#results li .status{display:inline-block;width:5.1em}#results .progress{height:14px;margin-right:5px;margin-bottom:0;position:relative;top:1px}#results li button{margin-left:1em}#results li{line-height:28px;position:relative}#results li:hover{background:#45515F}#results li .buttons{display:none;position:absolute;right:-3px;top:-3px}#results li:hover .buttons{display:block}.prbar{width:40px;background:#D9D9D9;float:left;margin:10px 5px 0 0;position:relative}.prbar-inner{background:#5EAA5E;height:4px;line-height:4px;position:relative}.flash{animation-name:flash;animation-duration:1s;animation-iteration-count:infinite}@keyframes flash{0%{background-color:transparent}50%{background-color:#468847}100%{background-color:transparent}}.jumbotron{padding:6em 0;margin:0;background-image:url(/debut_dark.png);background-repeat:repeat;background-size:auto auto;border-bottom:1px solid #20262D}.about{margin-top:3em}.center{text-align:center}.footer{padding:4em 0}.alert-delete .btn{margin-left:1em}#signup.modal{width:800px;margin-left:-400px}#signup-inner{max-height:600px}#signup iframe{height:500px;width:100%}#payment-options,#payment-options>li{list-style-type:none}#payment-options>li{display:inline-block}#payment-options .disabled{opacity:.4}#payment-options>li{border-right:2px solid #000;padding-right:14px;margin-right:10px}#payment-options>li:last-child{border:0}
+.navbar h1 {margin:0; line-height: inherit;}
+#lookup-form label {font-size:18.75px; padding: 11px 0; width: 57px; text-align:left;}
+#lookup-form .controls {margin-left: 79px;}
+#lookup-form .input-append { width: 100%; }
+#lookup-form input {width: -moz-calc(100% - 101px); width: -webkit-calc(100% - 101px); width: -o-calc(100% - 101px); width: calc(100% - 101px);}
+#lookup-form textarea {width: 100%; font-size: 16px; line-height:  24px;}
+input.btn-large {height:42px;}
+.multi .multimodetoggle, .multi .limit-note { line-height: 42px; margin-left: 20px;}
+.limit-note { float: right; }
+
+#results {display: none;}
+#results .refresh-all {float:right; line-height:40px; margin-top:10px;}
+#results ul, #results ul li {list-style-type: none; margin-left: 1px;padding-left: 0;}
+#results li .status {display: inline-block; width: 5.1em;}
+#results .progress {height: 14px; margin-right: 5px; margin-bottom: 0; position: relative; top: 1px; }
+#results li button { margin-left:1em;}
+#results li {line-height: 28px; position: relative;}
+#results li:hover {background: #45515F;}
+#results li .buttons {display: none; position: absolute; right: -3px; top: -3px;}
+#results li:hover .buttons {display: block;}
+.prbar {width: 40px; background: #D9D9D9; float: left; margin: 10px 5px 0 0; position: relative;}
+.prbar-inner {background: #5EAA5E; height: 4px; line-height: 4px; position: relative;}
+
+.flash {animation-name: flash; animation-duration: 1s; animation-iteration-count: infinite;}
+@keyframes flash {
+	0% {background-color:transparent;}
+	50% {background-color: #468847;}
+	100% {background-color:transparent;}
+}
+.jumbotron {padding: 6em 0; margin:0; background-image: url("/debut_dark.png"); background-repeat: repeat; background-size: auto auto; border-bottom: 1px solid #20262D;}
+.about {margin-top:3em; }
+.center {text-align: center;}
+.footer {padding:4em 0;}
+
+.alert-delete .btn {margin-left: 1em;}
+
+#signup.modal {width:800px; margin-left:-400px;}
+#signup-inner {max-height:600px;}
+#signup iframe {height: 500px; width: 100%;}
+#payment-options, #payment-options > li {list-style-type: none;}
+#payment-options > li {display:inline-block;}
+#payment-options .disabled {opacity: 0.4;}
+#payment-options > li { border-right: 2px solid black; padding-right: 14px; margin-right: 10px;}
+#payment-options > li:last-child {border: 0;}
+
+
+@media (max-width: 480px) { 
+#lookup-form .controls{margin-left:0;} 
+.jumbotron {padding: 3em 0;}
+}

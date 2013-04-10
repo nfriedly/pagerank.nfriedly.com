@@ -47,7 +47,8 @@ module.exports = function (grunt) {
         csslint: {
             options: {
                 ids: false,
-                "overqualified-elements": false
+                'overqualified-elements': false,
+                'qualified-headings': false
             },
             files: ['public-src/*.css']
         },
