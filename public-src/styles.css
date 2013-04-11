@@ -1,3 +1,4 @@
+.navbar h1 {margin:0; line-height: inherit;}
 #lookup-form label {font-size:18.75px; padding: 11px 0; width: 57px; text-align:left;}
 #lookup-form .controls {margin-left: 79px;}
 #lookup-form .input-append { width: 100%; }
@@ -41,3 +42,9 @@ input.btn-large {height:42px;}
 #payment-options .disabled {opacity: 0.4;}
 #payment-options > li { border-right: 2px solid black; padding-right: 14px; margin-right: 10px;}
 #payment-options > li:last-child {border: 0;}
+
+
+@media (max-width: 480px) { 
+#lookup-form .controls{margin-left:0;} 
+.jumbotron {padding: 3em 0;}
+}
