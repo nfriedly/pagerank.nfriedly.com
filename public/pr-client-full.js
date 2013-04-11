@@ -1916,7 +1916,7 @@ var DeletedAlert = Backbone.View.extend({
 });
 module.exports = DeletedAlert;
 
-},{"underscore":8,"backbone":11}],13:[function(require,module,exports){
+},{"backbone":11,"underscore":8}],13:[function(require,module,exports){
 var Backbone = require('backbone');
 var _ = require('underscore');
 
