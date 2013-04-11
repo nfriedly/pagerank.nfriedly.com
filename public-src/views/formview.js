@@ -91,7 +91,7 @@ var FormView = Backbone.View.extend({
     enableMultiMode: function () {
         this.multiMode = true;
         this.$('.single').slideUp();
-        this.$('.multi').slideDown();
+        this.$('.multi').hide().slideDown();
         // get the urls already in the multi-line form & the one from the single-line form
         var urls = this.getUrls();
         var url = this.input.val();
@@ -114,7 +114,7 @@ var FormView = Backbone.View.extend({
     disableMultiMode: function () {
         this.multiMode = false;
         this.trigger('modeChange', 'singlemode');
-        this.$('.single').slideDown();
+        this.$('.single').hide().slideDown();
         this.$('.multi').slideUp();
         var urls = this.getUrls();
         if (urls.length) {
