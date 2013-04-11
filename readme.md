@@ -19,8 +19,7 @@ Todo:
 -----
 
 * Fix grunt tasks for html and CSS auto-updating
-* .hide() alternate form after slideUp()'ing it.
-* Add partial support for legacy bookmarklett (pr, but no history), add analytics to legacy bookmarklett
+* Improve modal responsiveness
 * Redirect old pr app to new one
 * Consider adding a uservoice widget
 * Add pay-as-you-go plan & user accounts - https://www.mozilla.org/en-US/persona/
