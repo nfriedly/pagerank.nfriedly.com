@@ -76,9 +76,14 @@ function getPr(req, res) {
 }
 
 app.get('/api/pagerank', checkAuth, function (req, res) {
+    req.setHeader('Cache-Control', 'no-cache');
     getPr(req, res, false);
 });
 
+app.get('/api/headers', function (req, res) {
+    req.headers.getIp = getIp(req);
+    res.json(req.headers);
+});
 
 app.post('/api/purchase/reset', function (req, res) {
     console.log(req.body);
@@ -110,5 +115,22 @@ app.post('/api/purchase/reset', function (req, res) {
         });
     });
 });
+
+app.post('/api/purchase/paygo', function (req, res) {
+    console.dir(req.body);
+    var customer = stripe.customer.create({
+        card: req.body.id,
+        plan: "paygo",
+        email: req.body.email
+    }, function (err, stripe_response) {
+        console.dir(err, stripe_response);
+        // todo: create session
+        res.json(err || stripe_response);
+    });
+});
+
+// todo: create & destroy session on persona login/out, (checking email against stripe)
+// update checkAuth to check for valid session and allow through
+// ad new filter create a charge before (after?) successful lookup
 
 module.exports = app;
