@@ -31,8 +31,8 @@ function checkAuth(req, res, next) {
 
 function getIp(req) {
     if (req.headers['x-forwarded-for']) {
-        // this header can be faked, in that case heroku adds the real ip at the end
-        return req.headers['x-forwarded-for'].split(', ').pop();
+        // cloudfront first, then heroku. todo: handle fakes if 3 or more are present 
+        return req.headers['x-forwarded-for'].split(', ').unshift();
     }
     // for local development
     return req.connection.remoteAddress;
