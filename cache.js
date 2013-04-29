@@ -55,6 +55,6 @@ exports.getPr = getPr;
 
 function setPr(url, pr) {
     var key = exports.normalize(url);
-    client.set(key, pr);
+    client.setex(key, exports.ipExpire, pr);
 }
 exports.setPr = setPr;
