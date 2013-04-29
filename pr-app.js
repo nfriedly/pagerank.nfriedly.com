@@ -32,7 +32,7 @@ function checkAuth(req, res, next) {
 function getIp(req) {
     if (req.headers['x-forwarded-for']) {
         // cloudfront first, then heroku. todo: handle fakes if 3 or more are present 
-        return req.headers['x-forwarded-for'].split(', ').unshift();
+        return req.headers['x-forwarded-for'].split(', ').shift();
     }
     // for local development
     return req.connection.remoteAddress;
