@@ -184,6 +184,7 @@ module.exports = function (grunt) {
             options: {
                 key: process.env.AWS_KEY,
                 secret: process.env.AWS_SECRET,
+                region: 'us-west-2',
                 bucket: 'static.pagerank.nfriedly.com',
                 access: 'public-read',
                 maxOperations: 4,
