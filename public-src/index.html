@@ -141,7 +141,13 @@ src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
   		addScript('//cdnjs.cloudflare.com/ajax/libs/json3/3.2.4/json3.min.js');
   	}
   </script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+  <![endif]-->
+  <!--[if gte IE 9]><!-->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  <!--<![endif]-->  
   <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js" defer></script>
   <script>
   	var _gaq = _gaq || [];

@@ -1,6 +1,10 @@
 /*globals $:false, _gaq:false*/
 var _ = require('underscore');
 
+// hack - we need jquery to be global for bootstrap, so it doesn't make sense to include it again in the browserify bundle.
+var Backbone = require('backbone');
+Backbone.$ = window.$;
+
 if (window.location.pathname == "/signup.html") {
     signup();
 } else {
