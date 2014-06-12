@@ -10,6 +10,7 @@ var app = express();
 
 app.use(express.static(__dirname + '/public'));
 app.disable('x-powered-by');
+app.disable('etag'); // keep things simple
 app.use(bodyParser.urlencoded());
 
 var env = process.env.NODE_ENV || 'development';
