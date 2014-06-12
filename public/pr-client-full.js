@@ -1473,228 +1473,7 @@ var config = isDev ? devConfig : prodConfig;
 
 module.exports = config;
 
-},{}],2:[function(require,module,exports){
-var Backbone = require('backbone');
-var _ = require('underscore');
-
-var PageRank = require('../models/pagerank');
-
-var PageRanks = Backbone.Collection.extend({
-    model: PageRank,
-    delayMin: 1,
-    delayMax: 3,
-
-    initialize: function() {
-        this.on("add", this.save);
-        this.on("change", this.save);
-        this.on('remove', this.save);
-        this.on('error', this.handleError);
-        this.on('sync', this.lookupPending);
-    },
-
-    get: function(id) {
-        return Backbone.Collection.prototype.get.call(this, PageRank.prototype.normalize('' + id));
-    },
-
-    save: function() {
-        if (window.localStorage) {
-            window.localStorage.pageranks = JSON.stringify(this.toJSON());
-        }
-    },
-
-    comparator: function(model) {
-        // sorts by age, oldest first (the view adds new items to the top of the list, so oldest-first works)
-        return model.get('timestamp').getTime();
-    },
-
-    pendingTimeout: null,
-
-    // we keep the collection sorted in reverse order, so here we pop() off the last item
-    getNextPending: function() {
-        return this.filter(function(model) {
-            return model.pending;
-        }).pop();
-    },
-
-    // grabs the first pending model and sets a timeout to fetch it in a second or two.
-    // when it's results are recieved then we'll fire this function again
-    lookupPending: function() {
-        var model = this.getNextPending();
-        if (!model) return;
-        model.trigger('preload', model);
-        this.pendingTimeout = setTimeout(_.bind(model.fetch, model), this.getRandomDelay());
-    },
-
-    handleError: function( /*model, xhr*/ ) {
-        clearTimeout(this.pendingTimeout);
-    },
-
-    // 1-3 second delay for when loading multiple PR's at once
-    getRandomDelay: function() {
-        return this.delayMin + (Math.random() * (this.delayMax - this.delayMin) * 1000);
-    }
-});
-module.exports = PageRanks;
-
-},{"../models/pagerank":11,"backbone":9,"underscore":8}],4:[function(require,module,exports){
-var Backbone = require('backbone');
-//var _ = require('underscore');
-
-var DeletedAlert = require('./deletedalert');
-var PageRankView = require('./pagerankview');
-
-
-var ResultsList = Backbone.View.extend({
-    collection: null,
-    list: null,
-    visible: false,
-    views: null,
-
-    events: {
-        "click a.close": "hideError",
-        "click a.refresh-all": "refreshAll"
-    },
-
-    initialize: function( /*options*/ ) {
-        this.views = {};
-        this.list = this.$('ul');
-
-        this.listenTo(this.collection, 'add', this.addOne);
-        this.listenTo(this.collection, 'error', this.error);
-        this.listenTo(this.collection, 'remove', this.remove);
-        this.listenTo(this.collection, 'moveToTop', this.moveToTop);
-
-        if (this.collection.models.length) {
-            this.collection.each(this.addOne, this);
-        }
-
-        this.errContainer = this.$('.alert-error');
-        this.errBody = this.$('.alert-error p');
-
-    },
-
-    show: function() {
-        if (!this.visible) {
-            this.$el.show('fast');
-            this.visible = true;
-        }
-    },
-
-    addOne: function(pr) {
-        this.show();
-        var view = new PageRankView({
-            model: pr
-        });
-        this.list.prepend(view.render().el);
-        this.views[pr.id] = view;
-    },
-
-    removeOne: function(model) {
-        this.views[model.id].remove();
-        delete this.views[model.id];
-    },
-
-    hideError: function() {
-        this.errContainer.slideUp();
-    },
-
-    error: function(model, data) {
-        // signupView will handle this one
-        if (data && data.status == 403) {
-            return;
-        }
-        var msg;
-        if (data && typeof data.error == "string") {
-            msg = data.error;
-        } else {
-            msg = "Error communicating with server, please refresh the page and try again in a few minutes";
-        }
-        this.errBody.text(msg);
-        this.errContainer.fadeIn();
-    },
-
-    remove: function(model) {
-        new DeletedAlert({
-            model: model,
-            collection: this.collection
-        }).render().insertAfter(this.$('h2'));
-    },
-
-    moveToTop: function(model) {
-        var view = this.views[model.id];
-        var el = view.$el.detach();
-        this.list.prepend(el);
-        view.$el.hide().slideDown();
-    },
-
-    refreshAll: function(event) {
-        event.preventDefault();
-        this.collection.each(function(model) {
-            model.setPending(true);
-        });
-        this.collection.lookupPending();
-    }
-});
-
-module.exports = ResultsList;
-
-},{"./deletedalert":12,"./pagerankview":13,"backbone":9}],3:[function(require,module,exports){
-(function(){var Backbone = require('backbone');
-var config = require('../config');
-
-var SignupWrapper = Backbone.View.extend({
-    collection: null,
-
-    initialize: function() {
-        this.listenTo(this.collection, 'error', this.handleModelError);
-    },
-
-    show: function(force) {
-        this.$el.modal({
-            //backdrop: !force,
-            keyboard: !force
-        });
-        this.$('.close').toggle(!force);
-        //this.$('#payment-notify').toggle( !! force);
-        this.trigger('show', force);
-        var self = this;
-        this.$el.on('hide', function() {
-            self.trigger('hide');
-        });
-    },
-    render: function() {
-        this.$('#signup-inner').html('<iframe id="signup-frame" name="signup-frame" src="' + config.SECURE_SITE + '/signup.html" scrolling="no" frameborder="0" seamless></iframe>');
-        this.$iframe = this.$('iframe');
-        this.iframe = this.$iframe[0];
-    },
-    remove: function() {
-        this.win.removeEventListener('message', this.handleMessage, false);
-    },
-    handleModelError: function(model, response) {
-        if (response && response.status == 403) this.show(true);
-    },
-    handleMessage: function(event) {
-        // global console:false
-        //console.log('parent message receved', event, JSON.parse(event.data));
-        if (event.origin !== config.SECURE_SITE) return;
-        var data = JSON.parse(event.data);
-        if (data.cmd == 'purchase') {
-            this.trigger('purchase', {
-                plan: data.plan
-            });
-            this.$el.modal('hide');
-            this.collection.lookupPending();
-        }
-    },
-    sendMessage: function(msg) {
-        this.iframe.contentWindow.postMessage(JSON.stringify(msg), config.SECURE_SITE);
-    }
-});
-
-module.exports = SignupWrapper;
-
-})()
-},{"../config":10,"backbone":9}],9:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 (function(){//     Backbone.js 1.1.2
 
 //     (c) 2010-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -3305,7 +3084,228 @@ module.exports = SignupWrapper;
 }));
 
 })()
-},{"underscore":14}],5:[function(require,module,exports){
+},{"underscore":11}],2:[function(require,module,exports){
+var Backbone = require('backbone');
+var _ = require('underscore');
+
+var PageRank = require('../models/pagerank');
+
+var PageRanks = Backbone.Collection.extend({
+    model: PageRank,
+    delayMin: 1,
+    delayMax: 3,
+
+    initialize: function() {
+        this.on("add", this.save);
+        this.on("change", this.save);
+        this.on('remove', this.save);
+        this.on('error', this.handleError);
+        this.on('sync', this.lookupPending);
+    },
+
+    get: function(id) {
+        return Backbone.Collection.prototype.get.call(this, PageRank.prototype.normalize('' + id));
+    },
+
+    save: function() {
+        if (window.localStorage) {
+            window.localStorage.pageranks = JSON.stringify(this.toJSON());
+        }
+    },
+
+    comparator: function(model) {
+        // sorts by age, oldest first (the view adds new items to the top of the list, so oldest-first works)
+        return model.get('timestamp').getTime();
+    },
+
+    pendingTimeout: null,
+
+    // we keep the collection sorted in reverse order, so here we pop() off the last item
+    getNextPending: function() {
+        return this.filter(function(model) {
+            return model.pending;
+        }).pop();
+    },
+
+    // grabs the first pending model and sets a timeout to fetch it in a second or two.
+    // when it's results are recieved then we'll fire this function again
+    lookupPending: function() {
+        var model = this.getNextPending();
+        if (!model) return;
+        model.trigger('preload', model);
+        this.pendingTimeout = setTimeout(_.bind(model.fetch, model), this.getRandomDelay());
+    },
+
+    handleError: function( /*model, xhr*/ ) {
+        clearTimeout(this.pendingTimeout);
+    },
+
+    // 1-3 second delay for when loading multiple PR's at once
+    getRandomDelay: function() {
+        return this.delayMin + (Math.random() * (this.delayMax - this.delayMin) * 1000);
+    }
+});
+module.exports = PageRanks;
+
+},{"../models/pagerank":12,"backbone":9,"underscore":8}],3:[function(require,module,exports){
+(function(){var Backbone = require('backbone');
+var config = require('../config');
+
+var SignupWrapper = Backbone.View.extend({
+    collection: null,
+
+    initialize: function() {
+        this.listenTo(this.collection, 'error', this.handleModelError);
+    },
+
+    show: function(force) {
+        this.$el.modal({
+            //backdrop: !force,
+            keyboard: !force
+        });
+        this.$('.close').toggle(!force);
+        //this.$('#payment-notify').toggle( !! force);
+        this.trigger('show', force);
+        var self = this;
+        this.$el.on('hide', function() {
+            self.trigger('hide');
+        });
+    },
+    render: function() {
+        this.$('#signup-inner').html('<iframe id="signup-frame" name="signup-frame" src="' + config.SECURE_SITE + '/signup.html" scrolling="no" frameborder="0" seamless></iframe>');
+        this.$iframe = this.$('iframe');
+        this.iframe = this.$iframe[0];
+    },
+    remove: function() {
+        this.win.removeEventListener('message', this.handleMessage, false);
+    },
+    handleModelError: function(model, response) {
+        if (response && response.status == 403) this.show(true);
+    },
+    handleMessage: function(event) {
+        // global console:false
+        //console.log('parent message receved', event, JSON.parse(event.data));
+        if (event.origin !== config.SECURE_SITE) return;
+        var data = JSON.parse(event.data);
+        if (data.cmd == 'purchase') {
+            this.trigger('purchase', {
+                plan: data.plan
+            });
+            this.$el.modal('hide');
+            this.collection.lookupPending();
+        }
+    },
+    sendMessage: function(msg) {
+        this.iframe.contentWindow.postMessage(JSON.stringify(msg), config.SECURE_SITE);
+    }
+});
+
+module.exports = SignupWrapper;
+
+})()
+},{"../config":10,"backbone":9}],4:[function(require,module,exports){
+var Backbone = require('backbone');
+//var _ = require('underscore');
+
+var DeletedAlert = require('./deletedalert');
+var PageRankView = require('./pagerankview');
+
+
+var ResultsList = Backbone.View.extend({
+    collection: null,
+    list: null,
+    visible: false,
+    views: null,
+
+    events: {
+        "click a.close": "hideError",
+        "click a.refresh-all": "refreshAll"
+    },
+
+    initialize: function( /*options*/ ) {
+        this.views = {};
+        this.list = this.$('ul');
+
+        this.listenTo(this.collection, 'add', this.addOne);
+        this.listenTo(this.collection, 'error', this.error);
+        this.listenTo(this.collection, 'remove', this.remove);
+        this.listenTo(this.collection, 'moveToTop', this.moveToTop);
+
+        if (this.collection.models.length) {
+            this.collection.each(this.addOne, this);
+        }
+
+        this.errContainer = this.$('.alert-error');
+        this.errBody = this.$('.alert-error p');
+
+    },
+
+    show: function() {
+        if (!this.visible) {
+            this.$el.show('fast');
+            this.visible = true;
+        }
+    },
+
+    addOne: function(pr) {
+        this.show();
+        var view = new PageRankView({
+            model: pr
+        });
+        this.list.prepend(view.render().el);
+        this.views[pr.id] = view;
+    },
+
+    removeOne: function(model) {
+        this.views[model.id].remove();
+        delete this.views[model.id];
+    },
+
+    hideError: function() {
+        this.errContainer.slideUp();
+    },
+
+    error: function(model, data) {
+        // signupView will handle this one
+        if (data && data.status == 403) {
+            return;
+        }
+        var msg;
+        if (data && typeof data.error == "string") {
+            msg = data.error;
+        } else {
+            msg = "Error communicating with server, please refresh the page and try again in a few minutes";
+        }
+        this.errBody.text(msg);
+        this.errContainer.fadeIn();
+    },
+
+    remove: function(model) {
+        new DeletedAlert({
+            model: model,
+            collection: this.collection
+        }).render().insertAfter(this.$('h2'));
+    },
+
+    moveToTop: function(model) {
+        var view = this.views[model.id];
+        var el = view.$el.detach();
+        this.list.prepend(el);
+        view.$el.hide().slideDown();
+    },
+
+    refreshAll: function(event) {
+        event.preventDefault();
+        this.collection.each(function(model) {
+            model.setPending(true);
+        });
+        this.collection.lookupPending();
+    }
+});
+
+module.exports = ResultsList;
+
+},{"./deletedalert":13,"./pagerankview":14,"backbone":9}],5:[function(require,module,exports){
 (function(){/*global alert:false*/
 var Backbone = require('backbone');
 var _ = require('underscore');
@@ -3433,7 +3433,7 @@ var FormView = Backbone.View.extend({
 module.exports = FormView;
 
 })()
-},{"../models/pagerank":11,"backbone":9,"underscore":8}],6:[function(require,module,exports){
+},{"../models/pagerank":12,"backbone":9,"underscore":8}],6:[function(require,module,exports){
 (function(){/*global alert:false*/
 /*jshint scripturl:true*/
 var Backbone = require('backbone');
@@ -3542,7 +3542,7 @@ var SignupView = Backbone.View.extend({
 module.exports = SignupView;
 
 })()
-},{"../config":10,"backbone":9,"underscore":8}],14:[function(require,module,exports){
+},{"../config":10,"backbone":9,"underscore":8}],11:[function(require,module,exports){
 (function(){//     Underscore.js 1.6.0
 //     http://underscorejs.org
 //     (c) 2009-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -4888,7 +4888,7 @@ module.exports = SignupView;
 }).call(this);
 
 })()
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 var Backbone = require('backbone');
 
 
@@ -4969,7 +4969,7 @@ var PageRank = Backbone.Model.extend({
 
 module.exports = PageRank;
 
-},{"backbone":9}],12:[function(require,module,exports){
+},{"backbone":9}],13:[function(require,module,exports){
 var Backbone = require('backbone');
 var _ = require('underscore');
 
@@ -4996,7 +4996,7 @@ var DeletedAlert = Backbone.View.extend({
 });
 module.exports = DeletedAlert;
 
-},{"backbone":9,"underscore":8}],13:[function(require,module,exports){
+},{"backbone":9,"underscore":8}],14:[function(require,module,exports){
 var Backbone = require('backbone');
 var _ = require('underscore');
 
