@@ -1,6 +1,10 @@
 ;(function(e,t,n){function i(n,s){if(!t[n]){if(!e[n]){var o=typeof require=="function"&&require;if(!s&&o)return o(n,!0);if(r)return r(n,!0);throw new Error("Cannot find module '"+n+"'")}var u=t[n]={exports:{}};e[n][0].call(u.exports,function(t){var r=e[n][1][t];return i(r?r:t)},u,u.exports)}return t[n].exports}var r=typeof require=="function"&&require;for(var s=0;s<n.length;s++)i(n[s]);return i})({1:[function(require,module,exports){
-/*globals $:false, _gaq:false*/
+(function(){/*globals $:false, _gaq:false*/
 var _ = require('underscore');
+
+// hack - we need jquery to be global for bootstrap, so it doesn't make sense to include it again in the browserify bundle.
+var Backbone = require('backbone');
+Backbone.$ = window.$;
 
 if (window.location.pathname == "/signup.html") {
     signup();
@@ -103,7 +107,8 @@ function signup() {
     });
 }
 
-},{"./collections/pageranks":2,"./views/signupwrapper":3,"./views/resultslist":4,"./views/formview":5,"./views/bookmarklett":6,"./views/signup":7,"underscore":8}],8:[function(require,module,exports){
+})()
+},{"./collections/pageranks":2,"./views/signupwrapper":3,"./views/resultslist":4,"./views/formview":5,"./views/bookmarklett":6,"./views/signup":7,"underscore":8,"backbone":9}],8:[function(require,module,exports){
 (function(){//     Underscore.js 1.6.0
 //     http://underscorejs.org
 //     (c) 2009-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -1449,7 +1454,7 @@ function signup() {
 }).call(this);
 
 })()
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 var isDev = (typeof location != 'undefined' && location.hostname == 'localhost');
 
 var devConfig = {
@@ -1531,63 +1536,7 @@ var PageRanks = Backbone.Collection.extend({
 });
 module.exports = PageRanks;
 
-},{"../models/pagerank":10,"underscore":8,"backbone":11}],3:[function(require,module,exports){
-(function(){var Backbone = require('backbone');
-var config = require('../config');
-
-var SignupWrapper = Backbone.View.extend({
-    collection: null,
-
-    initialize: function() {
-        this.listenTo(this.collection, 'error', this.handleModelError);
-    },
-
-    show: function(force) {
-        this.$el.modal({
-            //backdrop: !force,
-            keyboard: !force
-        });
-        this.$('.close').toggle(!force);
-        //this.$('#payment-notify').toggle( !! force);
-        this.trigger('show', force);
-        var self = this;
-        this.$el.on('hide', function() {
-            self.trigger('hide');
-        });
-    },
-    render: function() {
-        this.$('#signup-inner').html('<iframe id="signup-frame" name="signup-frame" src="' + config.SECURE_SITE + '/signup.html" scrolling="no" frameborder="0" seamless></iframe>');
-        this.$iframe = this.$('iframe');
-        this.iframe = this.$iframe[0];
-    },
-    remove: function() {
-        this.win.removeEventListener('message', this.handleMessage, false);
-    },
-    handleModelError: function(model, response) {
-        if (response && response.status == 403) this.show(true);
-    },
-    handleMessage: function(event) {
-        // global console:false
-        //console.log('parent message receved', event, JSON.parse(event.data));
-        if (event.origin !== config.SECURE_SITE) return;
-        var data = JSON.parse(event.data);
-        if (data.cmd == 'purchase') {
-            this.trigger('purchase', {
-                plan: data.plan
-            });
-            this.$el.modal('hide');
-            this.collection.lookupPending();
-        }
-    },
-    sendMessage: function(msg) {
-        this.iframe.contentWindow.postMessage(JSON.stringify(msg), config.SECURE_SITE);
-    }
-});
-
-module.exports = SignupWrapper;
-
-})()
-},{"../config":9,"backbone":11}],4:[function(require,module,exports){
+},{"../models/pagerank":11,"backbone":9,"underscore":8}],4:[function(require,module,exports){
 var Backbone = require('backbone');
 //var _ = require('underscore');
 
@@ -1689,456 +1638,63 @@ var ResultsList = Backbone.View.extend({
 
 module.exports = ResultsList;
 
-},{"./deletedalert":12,"./pagerankview":13,"backbone":11}],5:[function(require,module,exports){
-(function(){/*global alert:false*/
-var Backbone = require('backbone');
-var _ = require('underscore');
-
-var PageRank = require('../models/pagerank');
-
-var FormView = Backbone.View.extend({
-    collection: null,
-    multiMode: false,
-    events: {
-        "click button": "handleLookupClick",
-        "click .multimodetoggle": "toggleMultiMode"
-    },
-    input: null,
-
-    initialize: function() {
-        this.input = this.$('input');
-        this.textarea = this.$('textarea');
-
-        if (window.location.hash && window.location.hash.length > 3) {
-            var url = window.location.hash.substr(1);
-            this.lookup(url);
-            this.trigger('lookup', 'Bookmarklett', url);
-        }
-    },
-
-    handleLookupClick: function(event) {
-        event.preventDefault();
-        if (this.multiMode) this.lookupMultiple();
-        else this.lookupSingle();
-    },
-
-    lookupSingle: function() {
-        var id = this.input.val();
-        if (!id) return alert('Please enter a URL first.');
-        this.lookup(id);
-        this.trigger('lookup', 'Single-line form', id);
-        this.input.val("");
-    },
-
-    trimRegex: /^\s+|\s+$/g,
-    trim: function(string) {
-        return string.replace(/^\s+|\s+$/g, "");
-    },
-
-    lineRegex: /[\r\n]+/,
-    getUrls: function() {
-        var lines = this.textarea.val().split(this.lineRegex);
-        return _.chain(lines).map(this.trim).compact().uniq().value();
-    },
-
-    lookupMultiple: function() {
-        var ids = this.getUrls();
-        if (!ids.length) return alert('Please enter one or more URLs first.');
-        _.each(ids.reverse(), function(id) {
-            this.lookup(id, true);
-        }, this);
-        this.trigger('lookup', 'Multi-line form', ids);
-        this.textarea.val("");
-        this.collection.lookupPending();
-    },
-
-    lookup: function(id, pending) {
-        var pr = this.collection.get(id);
-        if (pr && pr.newish()) {
-            pr.trigger('moveToTop', pr);
-            pr.flash();
-        } else if (pr) {
-            pr.trigger('moveToTop', pr);
-            this.fetchOrPending(pr, pending);
-        } else {
-            pr = new PageRank({
-                id: id
-            });
-            this.collection.add(pr);
-            this.fetchOrPending(pr, pending);
-        }
-    },
-
-    fetchOrPending: function(model, pending) {
-        if (pending) model.setPending(true);
-        else model.fetch();
-    },
-
-    toggleMultiMode: function(event) {
-        if (this.multiMode) this.disableMultiMode();
-        else this.enableMultiMode();
-        event.preventDefault();
-    },
-
-    enableMultiMode: function() {
-        this.multiMode = true;
-        this.$('.single').slideUp();
-        this.$('.multi').hide().slideDown();
-        // get the urls already in the multi-line form & the one from the single-line form
-        var urls = this.getUrls();
-        var url = this.input.val();
-        // make sure the url from the single-line form is in the list for the multi-line form
-        if (!_.contains(urls, url)) {
-            urls.unshift(url);
-        }
-        // add some empty lines to make copy-pasting easy
-        var length = this.textarea.attr('rows') || 10;
-        while (urls.length < length) {
-            urls.push('');
-        }
-        // and update the multi-line form
-        this.textarea.val(urls.join('\n'));
-
-        // and an event for analytics
-        this.trigger('modeChange', 'multimode');
-    },
-
-    disableMultiMode: function() {
-        this.multiMode = false;
-        this.trigger('modeChange', 'singlemode');
-        this.$('.single').hide().slideDown();
-        this.$('.multi').slideUp();
-        var urls = this.getUrls();
-        if (urls.length) {
-            this.input.val(urls[0]);
-        }
-    }
-});
-module.exports = FormView;
-
-})()
-},{"../models/pagerank":10,"backbone":11,"underscore":8}],6:[function(require,module,exports){
-(function(){/*global alert:false*/
-/*jshint scripturl:true*/
-var Backbone = require('backbone');
-
-var Bookmarklett = Backbone.View.extend({
-    events: {
-        "click": "handleClick",
-        "dragend": "handleInstall"
-    },
-
-    initialize: function() {
-        this.el.href = "javascript:void(window.open('http://" + location.host + "/#'+location.hostname+location.pathname, 'pagerank', 'scrollbars=1,width=514,height=480'))";
-    },
-
-    handleClick: function(event) {
-        event.preventDefault();
-        alert('To use this bookmarklett:\n\n1) Drag the "Get Pagerank" button to your bookmarks toolbar\n2) Navigate to the page you would like to look up\n3) Click the "Get Pagerank" bookmark you created in step 1');
-        this.trigger('install', false);
-    },
-
-    handleInstall: function() {
-        // we don't actually know that the bookmarklett was installed, but we're just going to pretend it was
-        this.trigger('install', true);
-    }
-
-});
-module.exports = Bookmarklett;
-
-})()
-},{"backbone":11}],7:[function(require,module,exports){
-(function(){/*global $:false, StripeCheckout:false, alert:false */
-var Backbone = require('backbone');
-var _ = require('underscore');
+},{"./deletedalert":12,"./pagerankview":13,"backbone":9}],3:[function(require,module,exports){
+(function(){var Backbone = require('backbone');
 var config = require('../config');
 
-var SignupView = Backbone.View.extend({
-    PLAN_RESET: 'reset',
-    PLAN_PAYGO: 'paygo',
-    events: {
-        'click #reset-buy': 'buyReset',
-        'click #paygo-signup': 'paygoSignup'
-    },
-    delayed_url: undefined,
-    buyReset: function() {
-        StripeCheckout.open({
-            key: config.STRIPE_KEY,
-            address: false,
-            amount: 200,
-            name: 'PageRank Lookup Limit Reset',
-            description: '10 additional Google Pagerank Lookups',
-            panelLabel: 'Checkout',
-            token: _.bind(this.handleStripeToken, this, this.PLAN_RESET)
-        });
-        this.trigger('purchase-click', this.PLAN_RESET);
-        return false;
-    },
-    paygoSignup: function() {
-        this.trigger('purchase-click', this.PLAN_PAYGO);
-        alert('Thanks for your interest, this option will be avaliable soon!\nIn the meanwhile, please try out the 10 for $2 option');
-        return false;
-    },
-    handleStripeToken: function(plan, stripe_res) {
-        $.post('/api/purchase/' + plan, stripe_res)
-            .done(_.bind(this.handleProvision, this, plan))
-            .fail(_.bind(this.handleProvisionError, this));
-        this.trigger('purchase', plan);
-    },
-    handleProvision: function(plan, res) {
-        this.sendMessage({
-            cmd: 'purchase',
-            plan: plan,
-            paid: res.paid
-        });
-        this.trigger('purchase-complete', plan);
-    },
-    handleProvisionError: function(xhr) {
-        var data;
-        try {
-            data = JSON.parse(xhr.responseText);
-        } catch (ex) {
-            data = {
-                error: 'Unknown error, unparsable server response. Please contact support with this message.\n\n' + (xhr ? xhr.responseText : '')
-            };
-        }
-        var message = data.error || 'Unknown error, please contact support';
-        message += '\n\nYour card was ' + (data.paid ? '' : 'NOT ') + 'charged';
-        alert(message);
-        this.trigger('purchase-error', message);
-    },
-    sendMessage: function(msg) {
-        // todo: check if I need to use JSON
-        parent.postMessage(JSON.stringify(msg), config.SITE);
-    },
-    handleMessage: function(msg) {
-        // global console:false
-        // console.log('iframe message recieved', msg, JSON.parse(msg.data));
-        if (msg.origin != config.SITE) return;
-        var data = JSON.parse(msg.data);
-        if (data.cmd == 'echo') {
-            this.sendMessage(data);
-        }
-
-    }
-});
-
-module.exports = SignupView;
-
-})()
-},{"../config":9,"backbone":11,"underscore":8}],10:[function(require,module,exports){
-var Backbone = require('backbone');
-
-
-var PageRank = Backbone.Model.extend({
-    //collection: PageRanks, // this is a circular reference
-    pending: false,
-    initialize: function(attrs /*, options*/ ) {
-        if (typeof attrs.timestamp == "string") {
-            attrs.timestamp = new Date(attrs.timestamp);
-        }
-        this.set('timestamp', attrs.timestamp || new Date());
-        this.set('id', this.normalize(attrs.id || ""));
-        this.status = (attrs.pagerank === undefined) ? PageRank.NOT_LOADED : PageRank.LOADED;
-
-        this.on('error', this.handleError);
-        this.on('request', this.notPending);
-    },
-
-    normalize: function(url) {
-        if (url.substring(0, 2) == "//") {
-            url = "http:" + url;
-        }
-        if (url.substring(0, 4) != "http") {
-            url = "http://" + url;
-        }
-        return url;
-    },
-
-    // less than a day old & with a defined pagerank
-    newish: function() {
-        return (this.age() <= 24 * 60 * 60) && this.get('pagerank') !== undefined;
-    },
-
-    age: function() {
-        return ((new Date()).getTime() - this.get('timestamp').getTime()) / 1000;
-    },
-
-    url: function() {
-        return '/api/pagerank?url=' + this.id;
-    },
-
-    parse: function(response) {
-        // response is already parsed to JSON by jQuery because of the content-type headers
-        if (response.error) {
-            this.status = PageRank.NOT_LOADED;
-            this.trigger('error', this, response);
-            throw response;
-        }
-        response.id = this.normalize(response.url);
-        delete response.url;
-        if (response.timestamp && typeof response.timestamp != typeof(new Date())) {
-            response.timestamp = new Date(response.timestamp);
-        } else {
-            response.timestamp = new Date();
-        }
-        return response;
-    },
-
-    handleError: function(model, response) {
-        this.pending = (response && response.status == 403);
-    },
-
-    notPending: function() {
-        this.setPending(false);
-    },
-
-    setPending: function(pending) {
-        this.pending = !!pending;
-        if (this.pending) {
-            this.trigger('pending');
-        }
-    },
-
-    flash: function(duration) {
-        this.trigger('flash', this, duration || 3);
-    }
-});
-
-module.exports = PageRank;
-
-},{"backbone":11}],12:[function(require,module,exports){
-var Backbone = require('backbone');
-var _ = require('underscore');
-
-var DeletedAlert = Backbone.View.extend({
-    model: null,
+var SignupWrapper = Backbone.View.extend({
     collection: null,
-    events: {
-        'click .close': 'remove',
-        'click .undo': 'undo'
-    },
-    template: _.template('<div class="alert alert-delete">' + '<button type="button" class="close">&times;</button>' + 'Deleted <%= id %>' + ' <button type="button" class="undo btn btn-info btn-small">Undo</button>' + '</div>'),
-
-    render: function() {
-        setTimeout(_.bind(this.remove, this), 30 * 1000);
-        return this.$el.html(this.template({
-            id: this.model.get('id')
-        }));
-    },
-
-    undo: function() {
-        this.collection.add(this.model);
-        this.remove();
-    }
-});
-module.exports = DeletedAlert;
-
-},{"backbone":11,"underscore":8}],13:[function(require,module,exports){
-var Backbone = require('backbone');
-var _ = require('underscore');
-
-var PageRankView = Backbone.View.extend({
-    tagName: 'li',
-    model: null,
-
-    events: {
-        'click .refresh': 'refresh',
-        'click .delete': 'destroy'
-    },
 
     initialize: function() {
-        // todo: make this run exactly once, the first time the collection has 1+ elements
-        this.listenTo(this.model, "change", this.render);
-        this.listenTo(this.model, "flash", this.flash);
-        this.listenTo(this.model, "remove", this.remove);
-        this.listenTo(this.model, "sync", this.sync);
-        this.listenTo(this.model, "request", this.request);
-        this.listenTo(this.model, "error", this.error);
-        this.listenTo(this.model, "pending", this.pending);
-        this.listenTo(this.model, "preload", this.preLoad);
+        this.listenTo(this.collection, 'error', this.handleModelError);
     },
 
-    prBarTemplate: _.template('<div class="prbar"><div class="prbar-inner" style="width: <%= (+pagerank || 0)  * 10 %>%"></div></div> - <%= pagerank %> -'),
-
-    template: _.template('<div class="status"><%= status %></div> <a href="<%= url %>" target="_blank"><%= url %></a> <div class="buttons"><button type="button" class="refresh btn btn-success">Refresh</button> <button type="button" class="delete btn btn-danger">&times;</button></div>'),
-
+    show: function(force) {
+        this.$el.modal({
+            //backdrop: !force,
+            keyboard: !force
+        });
+        this.$('.close').toggle(!force);
+        //this.$('#payment-notify').toggle( !! force);
+        this.trigger('show', force);
+        var self = this;
+        this.$el.on('hide', function() {
+            self.trigger('hide');
+        });
+    },
     render: function() {
-        this.$el.html(this.template({
-            status: this.getStatus(),
-            url: this.model.get('id')
-        }));
-        this.flash();
-        return this;
+        this.$('#signup-inner').html('<iframe id="signup-frame" name="signup-frame" src="' + config.SECURE_SITE + '/signup.html" scrolling="no" frameborder="0" seamless></iframe>');
+        this.$iframe = this.$('iframe');
+        this.iframe = this.$iframe[0];
     },
-
-
-    getStatus: function() {
-        var pr = this.model.get('pagerank');
-        if (pr === undefined) {
-            return "Unknown";
-        } else if (pr === null) {
-            return "Not ranked";
-        } else {
-            return this.prBarTemplate({
-                pagerank: pr
+    remove: function() {
+        this.win.removeEventListener('message', this.handleMessage, false);
+    },
+    handleModelError: function(model, response) {
+        if (response && response.status == 403) this.show(true);
+    },
+    handleMessage: function(event) {
+        // global console:false
+        //console.log('parent message receved', event, JSON.parse(event.data));
+        if (event.origin !== config.SECURE_SITE) return;
+        var data = JSON.parse(event.data);
+        if (data.cmd == 'purchase') {
+            this.trigger('purchase', {
+                plan: data.plan
             });
+            this.$el.modal('hide');
+            this.collection.lookupPending();
         }
     },
-
-    loadingTemplate: '<div class="progress progress-striped active"><div class="bar" style="width: 100%;"></div></div>',
-    pendingTemplate: '<div class="progress progress-striped"><div class="bar" style="width: 100%;"></div></div>',
-
-    setStatus: function(status) {
-
-        this.$('.status').html(status);
-    },
-
-    request: function() {
-        this.setStatus(this.loadingTemplate);
-        //this.$el.addClass('loading');
-    },
-
-    sync: function() {
-        //this.$el.removeClass('loading');
-        this.render();
-    },
-
-    error: function(model, response) {
-        this.setStatus(response && response.status == 403 ? this.loadingTemplate : 'Error');
-    },
-
-    flash: function(model, times) {
-        times = times || 1;
-        var $el = this.$el;
-        $el.addClass('flash');
-        _.delay(function() {
-            $el.removeClass('flash');
-        }, times * 1000);
-    },
-
-    refresh: function() {
-        this.model.fetch();
-    },
-
-    pending: function() {
-        this.setStatus(this.pendingTemplate);
-    },
-
-    preLoad: function() {
-        this.setStatus(this.loadingTemplate);
-    },
-
-    destroy: function() {
-        // we don't want to actually destroy the model, just remove it from the collection 
-        // (and hand it over to the 'undo' view)
-        this.model.collection.remove(this.model.get('id'));
+    sendMessage: function(msg) {
+        this.iframe.contentWindow.postMessage(JSON.stringify(msg), config.SECURE_SITE);
     }
 });
 
-module.exports = PageRankView;
+module.exports = SignupWrapper;
 
-},{"backbone":11,"underscore":8}],11:[function(require,module,exports){
+})()
+},{"../config":10,"backbone":9}],9:[function(require,module,exports){
 (function(){//     Backbone.js 1.1.2
 
 //     (c) 2010-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -3749,7 +3305,244 @@ module.exports = PageRankView;
 }));
 
 })()
-},{"underscore":14}],14:[function(require,module,exports){
+},{"underscore":14}],5:[function(require,module,exports){
+(function(){/*global alert:false*/
+var Backbone = require('backbone');
+var _ = require('underscore');
+
+var PageRank = require('../models/pagerank');
+
+var FormView = Backbone.View.extend({
+    collection: null,
+    multiMode: false,
+    events: {
+        "click button": "handleLookupClick",
+        "click .multimodetoggle": "toggleMultiMode"
+    },
+    input: null,
+
+    initialize: function() {
+        this.input = this.$('input');
+        this.textarea = this.$('textarea');
+
+        if (window.location.hash && window.location.hash.length > 3) {
+            var url = window.location.hash.substr(1);
+            this.lookup(url);
+            this.trigger('lookup', 'Bookmarklett', url);
+        }
+    },
+
+    handleLookupClick: function(event) {
+        event.preventDefault();
+        if (this.multiMode) this.lookupMultiple();
+        else this.lookupSingle();
+    },
+
+    lookupSingle: function() {
+        var id = this.input.val();
+        if (!id) return alert('Please enter a URL first.');
+        this.lookup(id);
+        this.trigger('lookup', 'Single-line form', id);
+        this.input.val("");
+    },
+
+    trimRegex: /^\s+|\s+$/g,
+    trim: function(string) {
+        return string.replace(/^\s+|\s+$/g, "");
+    },
+
+    lineRegex: /[\r\n]+/,
+    getUrls: function() {
+        var lines = this.textarea.val().split(this.lineRegex);
+        return _.chain(lines).map(this.trim).compact().uniq().value();
+    },
+
+    lookupMultiple: function() {
+        var ids = this.getUrls();
+        if (!ids.length) return alert('Please enter one or more URLs first.');
+        _.each(ids.reverse(), function(id) {
+            this.lookup(id, true);
+        }, this);
+        this.trigger('lookup', 'Multi-line form', ids);
+        this.textarea.val("");
+        this.collection.lookupPending();
+    },
+
+    lookup: function(id, pending) {
+        var pr = this.collection.get(id);
+        if (pr && pr.newish()) {
+            pr.trigger('moveToTop', pr);
+            pr.flash();
+        } else if (pr) {
+            pr.trigger('moveToTop', pr);
+            this.fetchOrPending(pr, pending);
+        } else {
+            pr = new PageRank({
+                id: id
+            });
+            this.collection.add(pr);
+            this.fetchOrPending(pr, pending);
+        }
+    },
+
+    fetchOrPending: function(model, pending) {
+        if (pending) model.setPending(true);
+        else model.fetch();
+    },
+
+    toggleMultiMode: function(event) {
+        if (this.multiMode) this.disableMultiMode();
+        else this.enableMultiMode();
+        event.preventDefault();
+    },
+
+    enableMultiMode: function() {
+        this.multiMode = true;
+        this.$('.single').slideUp();
+        this.$('.multi').hide().slideDown();
+        // get the urls already in the multi-line form & the one from the single-line form
+        var urls = this.getUrls();
+        var url = this.input.val();
+        // make sure the url from the single-line form is in the list for the multi-line form
+        if (!_.contains(urls, url)) {
+            urls.unshift(url);
+        }
+        // add some empty lines to make copy-pasting easy
+        var length = this.textarea.attr('rows') || 10;
+        while (urls.length < length) {
+            urls.push('');
+        }
+        // and update the multi-line form
+        this.textarea.val(urls.join('\n'));
+
+        // and an event for analytics
+        this.trigger('modeChange', 'multimode');
+    },
+
+    disableMultiMode: function() {
+        this.multiMode = false;
+        this.trigger('modeChange', 'singlemode');
+        this.$('.single').hide().slideDown();
+        this.$('.multi').slideUp();
+        var urls = this.getUrls();
+        if (urls.length) {
+            this.input.val(urls[0]);
+        }
+    }
+});
+module.exports = FormView;
+
+})()
+},{"../models/pagerank":11,"backbone":9,"underscore":8}],6:[function(require,module,exports){
+(function(){/*global alert:false*/
+/*jshint scripturl:true*/
+var Backbone = require('backbone');
+
+var Bookmarklett = Backbone.View.extend({
+    events: {
+        "click": "handleClick",
+        "dragend": "handleInstall"
+    },
+
+    initialize: function() {
+        this.el.href = "javascript:void(window.open('http://" + location.host + "/#'+location.hostname+location.pathname, 'pagerank', 'scrollbars=1,width=514,height=480'))";
+    },
+
+    handleClick: function(event) {
+        event.preventDefault();
+        alert('To use this bookmarklett:\n\n1) Drag the "Get Pagerank" button to your bookmarks toolbar\n2) Navigate to the page you would like to look up\n3) Click the "Get Pagerank" bookmark you created in step 1');
+        this.trigger('install', false);
+    },
+
+    handleInstall: function() {
+        // we don't actually know that the bookmarklett was installed, but we're just going to pretend it was
+        this.trigger('install', true);
+    }
+
+});
+module.exports = Bookmarklett;
+
+})()
+},{"backbone":9}],7:[function(require,module,exports){
+(function(){/*global $:false, StripeCheckout:false, alert:false */
+var Backbone = require('backbone');
+var _ = require('underscore');
+var config = require('../config');
+
+var SignupView = Backbone.View.extend({
+    PLAN_RESET: 'reset',
+    PLAN_PAYGO: 'paygo',
+    events: {
+        'click #reset-buy': 'buyReset',
+        'click #paygo-signup': 'paygoSignup'
+    },
+    delayed_url: undefined,
+    buyReset: function() {
+        StripeCheckout.open({
+            key: config.STRIPE_KEY,
+            address: false,
+            amount: 200,
+            name: 'PageRank Lookup Limit Reset',
+            description: '10 additional Google Pagerank Lookups',
+            panelLabel: 'Checkout',
+            token: _.bind(this.handleStripeToken, this, this.PLAN_RESET)
+        });
+        this.trigger('purchase-click', this.PLAN_RESET);
+        return false;
+    },
+    paygoSignup: function() {
+        this.trigger('purchase-click', this.PLAN_PAYGO);
+        alert('Thanks for your interest, this option will be avaliable soon!\nIn the meanwhile, please try out the 10 for $2 option');
+        return false;
+    },
+    handleStripeToken: function(plan, stripe_res) {
+        $.post('/api/purchase/' + plan, stripe_res)
+            .done(_.bind(this.handleProvision, this, plan))
+            .fail(_.bind(this.handleProvisionError, this));
+        this.trigger('purchase', plan);
+    },
+    handleProvision: function(plan, res) {
+        this.sendMessage({
+            cmd: 'purchase',
+            plan: plan,
+            paid: res.paid
+        });
+        this.trigger('purchase-complete', plan);
+    },
+    handleProvisionError: function(xhr) {
+        var data;
+        try {
+            data = JSON.parse(xhr.responseText);
+        } catch (ex) {
+            data = {
+                error: 'Unknown error, unparsable server response. Please contact support with this message.\n\n' + (xhr ? xhr.responseText : '')
+            };
+        }
+        var message = data.error || 'Unknown error, please contact support';
+        message += '\n\nYour card was ' + (data.paid ? '' : 'NOT ') + 'charged';
+        alert(message);
+        this.trigger('purchase-error', message);
+    },
+    sendMessage: function(msg) {
+        // todo: check if I need to use JSON
+        parent.postMessage(JSON.stringify(msg), config.SITE);
+    },
+    handleMessage: function(msg) {
+        // global console:false
+        // console.log('iframe message recieved', msg, JSON.parse(msg.data));
+        if (msg.origin != config.SITE) return;
+        var data = JSON.parse(msg.data);
+        if (data.cmd == 'echo') {
+            this.sendMessage(data);
+        }
+
+    }
+});
+
+module.exports = SignupView;
+
+})()
+},{"../config":10,"backbone":9,"underscore":8}],14:[function(require,module,exports){
 (function(){//     Underscore.js 1.6.0
 //     http://underscorejs.org
 //     (c) 2009-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -5095,5 +4888,217 @@ module.exports = PageRankView;
 }).call(this);
 
 })()
-},{}]},{},[1])
+},{}],11:[function(require,module,exports){
+var Backbone = require('backbone');
+
+
+var PageRank = Backbone.Model.extend({
+    //collection: PageRanks, // this is a circular reference
+    pending: false,
+    initialize: function(attrs /*, options*/ ) {
+        if (typeof attrs.timestamp == "string") {
+            attrs.timestamp = new Date(attrs.timestamp);
+        }
+        this.set('timestamp', attrs.timestamp || new Date());
+        this.set('id', this.normalize(attrs.id || ""));
+        this.status = (attrs.pagerank === undefined) ? PageRank.NOT_LOADED : PageRank.LOADED;
+
+        this.on('error', this.handleError);
+        this.on('request', this.notPending);
+    },
+
+    normalize: function(url) {
+        if (url.substring(0, 2) == "//") {
+            url = "http:" + url;
+        }
+        if (url.substring(0, 4) != "http") {
+            url = "http://" + url;
+        }
+        return url;
+    },
+
+    // less than a day old & with a defined pagerank
+    newish: function() {
+        return (this.age() <= 24 * 60 * 60) && this.get('pagerank') !== undefined;
+    },
+
+    age: function() {
+        return ((new Date()).getTime() - this.get('timestamp').getTime()) / 1000;
+    },
+
+    url: function() {
+        return '/api/pagerank?url=' + this.id;
+    },
+
+    parse: function(response) {
+        // response is already parsed to JSON by jQuery because of the content-type headers
+        if (response.error) {
+            this.status = PageRank.NOT_LOADED;
+            this.trigger('error', this, response);
+            throw response;
+        }
+        response.id = this.normalize(response.url);
+        delete response.url;
+        if (response.timestamp && typeof response.timestamp != typeof(new Date())) {
+            response.timestamp = new Date(response.timestamp);
+        } else {
+            response.timestamp = new Date();
+        }
+        return response;
+    },
+
+    handleError: function(model, response) {
+        this.pending = (response && response.status == 403);
+    },
+
+    notPending: function() {
+        this.setPending(false);
+    },
+
+    setPending: function(pending) {
+        this.pending = !!pending;
+        if (this.pending) {
+            this.trigger('pending');
+        }
+    },
+
+    flash: function(duration) {
+        this.trigger('flash', this, duration || 3);
+    }
+});
+
+module.exports = PageRank;
+
+},{"backbone":9}],12:[function(require,module,exports){
+var Backbone = require('backbone');
+var _ = require('underscore');
+
+var DeletedAlert = Backbone.View.extend({
+    model: null,
+    collection: null,
+    events: {
+        'click .close': 'remove',
+        'click .undo': 'undo'
+    },
+    template: _.template('<div class="alert alert-delete">' + '<button type="button" class="close">&times;</button>' + 'Deleted <%= id %>' + ' <button type="button" class="undo btn btn-info btn-small">Undo</button>' + '</div>'),
+
+    render: function() {
+        setTimeout(_.bind(this.remove, this), 30 * 1000);
+        return this.$el.html(this.template({
+            id: this.model.get('id')
+        }));
+    },
+
+    undo: function() {
+        this.collection.add(this.model);
+        this.remove();
+    }
+});
+module.exports = DeletedAlert;
+
+},{"backbone":9,"underscore":8}],13:[function(require,module,exports){
+var Backbone = require('backbone');
+var _ = require('underscore');
+
+var PageRankView = Backbone.View.extend({
+    tagName: 'li',
+    model: null,
+
+    events: {
+        'click .refresh': 'refresh',
+        'click .delete': 'destroy'
+    },
+
+    initialize: function() {
+        // todo: make this run exactly once, the first time the collection has 1+ elements
+        this.listenTo(this.model, "change", this.render);
+        this.listenTo(this.model, "flash", this.flash);
+        this.listenTo(this.model, "remove", this.remove);
+        this.listenTo(this.model, "sync", this.sync);
+        this.listenTo(this.model, "request", this.request);
+        this.listenTo(this.model, "error", this.error);
+        this.listenTo(this.model, "pending", this.pending);
+        this.listenTo(this.model, "preload", this.preLoad);
+    },
+
+    prBarTemplate: _.template('<div class="prbar"><div class="prbar-inner" style="width: <%= (+pagerank || 0)  * 10 %>%"></div></div> - <%= pagerank %> -'),
+
+    template: _.template('<div class="status"><%= status %></div> <a href="<%= url %>" target="_blank"><%= url %></a> <div class="buttons"><button type="button" class="refresh btn btn-success">Refresh</button> <button type="button" class="delete btn btn-danger">&times;</button></div>'),
+
+    render: function() {
+        this.$el.html(this.template({
+            status: this.getStatus(),
+            url: this.model.get('id')
+        }));
+        this.flash();
+        return this;
+    },
+
+
+    getStatus: function() {
+        var pr = this.model.get('pagerank');
+        if (pr === undefined) {
+            return "Unknown";
+        } else if (pr === null) {
+            return "Not ranked";
+        } else {
+            return this.prBarTemplate({
+                pagerank: pr
+            });
+        }
+    },
+
+    loadingTemplate: '<div class="progress progress-striped active"><div class="bar" style="width: 100%;"></div></div>',
+    pendingTemplate: '<div class="progress progress-striped"><div class="bar" style="width: 100%;"></div></div>',
+
+    setStatus: function(status) {
+
+        this.$('.status').html(status);
+    },
+
+    request: function() {
+        this.setStatus(this.loadingTemplate);
+        //this.$el.addClass('loading');
+    },
+
+    sync: function() {
+        //this.$el.removeClass('loading');
+        this.render();
+    },
+
+    error: function(model, response) {
+        this.setStatus(response && response.status == 403 ? this.loadingTemplate : 'Error');
+    },
+
+    flash: function(model, times) {
+        times = times || 1;
+        var $el = this.$el;
+        $el.addClass('flash');
+        _.delay(function() {
+            $el.removeClass('flash');
+        }, times * 1000);
+    },
+
+    refresh: function() {
+        this.model.fetch();
+    },
+
+    pending: function() {
+        this.setStatus(this.pendingTemplate);
+    },
+
+    preLoad: function() {
+        this.setStatus(this.loadingTemplate);
+    },
+
+    destroy: function() {
+        // we don't want to actually destroy the model, just remove it from the collection 
+        // (and hand it over to the 'undo' view)
+        this.model.collection.remove(this.model.get('id'));
+    }
+});
+
+module.exports = PageRankView;
+
+},{"backbone":9,"underscore":8}]},{},[1])
 ;
