@@ -11,15 +11,6 @@ if (window.location.pathname == "/signup.html") {
 
 function app() {
 
-    var user = require('./models/user').getUser();
-
-    var Welcome = require('./views/welcome');
-    var welcome = new Welcome({
-        model: user,
-        el: $('#welcome')
-    });
-    welcome.render();
-
     var PageRanks = require('./collections/pageranks');
     var cachedResults = window.localStorage && window.localStorage.pageranks;
     var pageRanks = new PageRanks(cachedResults && JSON.parse(cachedResults) || []);
@@ -112,7 +103,7 @@ function signup() {
     });
 }
 
-},{"./models/user":2,"./views/welcome":3,"./collections/pageranks":4,"./views/signupwrapper":5,"./views/resultslist":6,"./views/formview":7,"./views/bookmarklett":8,"./views/signup":9,"underscore":10}],10:[function(require,module,exports){
+},{"./collections/pageranks":2,"./views/signupwrapper":3,"./views/resultslist":4,"./views/formview":5,"./views/bookmarklett":6,"./views/signup":7,"underscore":8}],8:[function(require,module,exports){
 (function(){//     Underscore.js 1.4.4
 //     http://underscorejs.org
 //     (c) 2009-2013 Jeremy Ashkenas, DocumentCloud Inc.
@@ -1341,7 +1332,7 @@ function signup() {
 }).call(this);
 
 })()
-},{}],11:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 var isDev = (typeof location != 'undefined' && location.hostname == 'localhost');
 
 var devConfig = {
@@ -1361,56 +1352,6 @@ var config = isDev ? devConfig : prodConfig;
 module.exports = config;
 
 },{}],2:[function(require,module,exports){
-var Backbone = require('backbone');
-
-
-var User = Backbone.Model.extend({
-
-    initialize: function () {
-        this.on("change", this.save);
-    },
-
-    save: function () {
-        if (window.localStorage) {
-            window.localStorage.user = JSON.stringify(this.toJSON());
-        }
-    }
-});
-
-function getUser() {
-    // todo: make this better
-    var data = (window.localStorage && localStorage.user && JSON.parse(localStorage.user)) || {};
-    return new User(data);
-}
-
-User.getUser = getUser;
-
-module.exports = User;
-
-},{"backbone":12}],3:[function(require,module,exports){
-var Backbone = require('backbone');
-
-var Welcome = Backbone.View.extend({
-    model: null,
-
-    events: {
-        'click .close': 'saveDismiss'
-    },
-
-    render: function () {
-        if (!this.model.get('newSiteDismissed')) {
-            this.$el.show();
-        }
-    },
-
-    saveDismiss: function () {
-        this.model.set('newSiteDismissed', true);
-        this.$el.hide();
-    }
-});
-module.exports = Welcome;
-
-},{"backbone":12}],4:[function(require,module,exports){
 var Backbone = require('backbone');
 var _ = require('underscore');
 
@@ -1473,7 +1414,7 @@ var PageRanks = Backbone.Collection.extend({
 });
 module.exports = PageRanks;
 
-},{"../models/pagerank":13,"backbone":12,"underscore":10}],5:[function(require,module,exports){
+},{"../models/pagerank":10,"backbone":11,"underscore":8}],3:[function(require,module,exports){
 (function(){var Backbone = require('backbone');
 var config = require('../config');
 
@@ -1529,7 +1470,7 @@ var SignupWrapper = Backbone.View.extend({
 module.exports = SignupWrapper;
 
 })()
-},{"../config":11,"backbone":12}],6:[function(require,module,exports){
+},{"../config":9,"backbone":11}],4:[function(require,module,exports){
 var Backbone = require('backbone');
 //var _ = require('underscore');
 
@@ -1631,7 +1572,7 @@ var ResultsList = Backbone.View.extend({
 
 module.exports = ResultsList;
 
-},{"./deletedalert":14,"./pagerankview":15,"backbone":12}],7:[function(require,module,exports){
+},{"./deletedalert":12,"./pagerankview":13,"backbone":11}],5:[function(require,module,exports){
 (function(){/*global alert:false*/
 var Backbone = require('backbone');
 var _ = require('underscore');
@@ -1759,7 +1700,7 @@ var FormView = Backbone.View.extend({
 module.exports = FormView;
 
 })()
-},{"../models/pagerank":13,"backbone":12,"underscore":10}],8:[function(require,module,exports){
+},{"../models/pagerank":10,"backbone":11,"underscore":8}],6:[function(require,module,exports){
 (function(){/*global alert:false*/
 /*jshint scripturl:true*/
 var Backbone = require('backbone');
@@ -1789,7 +1730,7 @@ var Bookmarklett = Backbone.View.extend({
 module.exports = Bookmarklett;
 
 })()
-},{"backbone":12}],9:[function(require,module,exports){
+},{"backbone":11}],7:[function(require,module,exports){
 (function(){/*global $:false, StripeCheckout:false, alert:false */
 var Backbone = require('backbone');
 var _ = require('underscore');
@@ -1868,7 +1809,7 @@ var SignupView = Backbone.View.extend({
 module.exports = SignupView;
 
 })()
-},{"../config":11,"backbone":12,"underscore":10}],13:[function(require,module,exports){
+},{"../config":9,"backbone":11,"underscore":8}],10:[function(require,module,exports){
 var Backbone = require('backbone');
 
 
@@ -1949,7 +1890,7 @@ var PageRank = Backbone.Model.extend({
 
 module.exports = PageRank;
 
-},{"backbone":12}],14:[function(require,module,exports){
+},{"backbone":11}],12:[function(require,module,exports){
 var Backbone = require('backbone');
 var _ = require('underscore');
 
@@ -1976,7 +1917,7 @@ var DeletedAlert = Backbone.View.extend({
 });
 module.exports = DeletedAlert;
 
-},{"backbone":12,"underscore":10}],15:[function(require,module,exports){
+},{"backbone":11,"underscore":8}],13:[function(require,module,exports){
 var Backbone = require('backbone');
 var _ = require('underscore');
 
@@ -2080,7 +2021,7 @@ var PageRankView = Backbone.View.extend({
 
 module.exports = PageRankView;
 
-},{"backbone":12,"underscore":10}],12:[function(require,module,exports){
+},{"backbone":11,"underscore":8}],11:[function(require,module,exports){
 (function(){//     Backbone.js 1.0.0
 
 //     (c) 2010-2013 Jeremy Ashkenas, DocumentCloud Inc.
@@ -3654,7 +3595,7 @@ module.exports = PageRankView;
 }).call(this);
 
 })()
-},{"underscore":16}],16:[function(require,module,exports){
+},{"underscore":14}],14:[function(require,module,exports){
 (function(){//     Underscore.js 1.4.4
 //     http://underscorejs.org
 //     (c) 2009-2013 Jeremy Ashkenas, DocumentCloud Inc.
