@@ -10,15 +10,6 @@ if (window.location.pathname == "/signup.html") {
 
 function app() {
 
-    var user = require('./models/user').getUser();
-
-    var Welcome = require('./views/welcome');
-    var welcome = new Welcome({
-        model: user,
-        el: $('#welcome')
-    });
-    welcome.render();
-
     var PageRanks = require('./collections/pageranks');
     var cachedResults = window.localStorage && window.localStorage.pageranks;
     var pageRanks = new PageRanks(cachedResults && JSON.parse(cachedResults) || []);
