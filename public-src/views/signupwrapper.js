@@ -4,11 +4,11 @@ var config = require('../config');
 var SignupWrapper = Backbone.View.extend({
     collection: null,
 
-    initialize: function () {
+    initialize: function() {
         this.listenTo(this.collection, 'error', this.handleModelError);
     },
 
-    show: function (force) {
+    show: function(force) {
         this.$el.modal({
             //backdrop: !force,
             keyboard: !force
@@ -17,22 +17,22 @@ var SignupWrapper = Backbone.View.extend({
         //this.$('#payment-notify').toggle( !! force);
         this.trigger('show', force);
         var self = this;
-        this.$el.on('hide', function () {
+        this.$el.on('hide', function() {
             self.trigger('hide');
         });
     },
-    render: function () {
+    render: function() {
         this.$('#signup-inner').html('<iframe id="signup-frame" name="signup-frame" src="' + config.SECURE_SITE + '/signup.html" scrolling="no" frameborder="0" seamless></iframe>');
         this.$iframe = this.$('iframe');
         this.iframe = this.$iframe[0];
     },
-    remove: function () {
+    remove: function() {
         this.win.removeEventListener('message', this.handleMessage, false);
     },
-    handleModelError: function (model, response) {
+    handleModelError: function(model, response) {
         if (response && response.status == 403) this.show(true);
     },
-    handleMessage: function (event) {
+    handleMessage: function(event) {
         // global console:false
         //console.log('parent message receved', event, JSON.parse(event.data));
         if (event.origin !== config.SECURE_SITE) return;
@@ -45,7 +45,7 @@ var SignupWrapper = Backbone.View.extend({
             this.collection.lookupPending();
         }
     },
-    sendMessage: function (msg) {
+    sendMessage: function(msg) {
         this.iframe.contentWindow.postMessage(JSON.stringify(msg), config.SECURE_SITE);
     }
 });

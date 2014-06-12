@@ -7,7 +7,7 @@ var client = redis.createClient(redisURL.port, redisURL.hostname, {
 });
 client.auth(redisURL.auth.split(":")[1]);
 
-client.on("error", function (err) {
+client.on("error", function(err) {
     console.error("Error " + err);
 });
 
@@ -21,7 +21,7 @@ function getKey(ip) {
 
 function checkIpAllowed(ip, callback) {
     var key = getKey(ip);
-    client.incr(key, function (err, res) {
+    client.incr(key, function(err, res) {
         // incr creates non-existant keys and gives them a value of 1
         if (res == 1) {
             client.expire(key, exports.ipExpire);
@@ -46,7 +46,7 @@ function normalize(url) {
 exports.normalize = normalize;
 
 function getPr(url, callback) {
-    client.get(exports.normalize(url), function (err, res) {
+    client.get(exports.normalize(url), function(err, res) {
         var pr = parseInt(res, 10) || null;
         callback(err, pr);
     });

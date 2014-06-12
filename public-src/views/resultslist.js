@@ -16,7 +16,7 @@ var ResultsList = Backbone.View.extend({
         "click a.refresh-all": "refreshAll"
     },
 
-    initialize: function ( /*options*/ ) {
+    initialize: function( /*options*/ ) {
         this.views = {};
         this.list = this.$('ul');
 
@@ -34,14 +34,14 @@ var ResultsList = Backbone.View.extend({
 
     },
 
-    show: function () {
+    show: function() {
         if (!this.visible) {
             this.$el.show('fast');
             this.visible = true;
         }
     },
 
-    addOne: function (pr) {
+    addOne: function(pr) {
         this.show();
         var view = new PageRankView({
             model: pr
@@ -50,16 +50,16 @@ var ResultsList = Backbone.View.extend({
         this.views[pr.id] = view;
     },
 
-    removeOne: function (model) {
+    removeOne: function(model) {
         this.views[model.id].remove();
         delete this.views[model.id];
     },
 
-    hideError: function () {
+    hideError: function() {
         this.errContainer.slideUp();
     },
 
-    error: function (model, data) {
+    error: function(model, data) {
         // signupView will handle this one
         if (data && data.status == 403) {
             return;
@@ -74,23 +74,23 @@ var ResultsList = Backbone.View.extend({
         this.errContainer.fadeIn();
     },
 
-    remove: function (model) {
+    remove: function(model) {
         new DeletedAlert({
             model: model,
             collection: this.collection
         }).render().insertAfter(this.$('h2'));
     },
 
-    moveToTop: function (model) {
+    moveToTop: function(model) {
         var view = this.views[model.id];
         var el = view.$el.detach();
         this.list.prepend(el);
         view.$el.hide().slideDown();
     },
 
-    refreshAll: function (event) {
+    refreshAll: function(event) {
         event.preventDefault();
-        this.collection.each(function (model) {
+        this.collection.each(function(model) {
             model.setPending(true);
         });
         this.collection.lookupPending();

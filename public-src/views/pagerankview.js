@@ -10,7 +10,7 @@ var PageRankView = Backbone.View.extend({
         'click .delete': 'destroy'
     },
 
-    initialize: function () {
+    initialize: function() {
         // todo: make this run exactly once, the first time the collection has 1+ elements
         this.listenTo(this.model, "change", this.render);
         this.listenTo(this.model, "flash", this.flash);
@@ -26,7 +26,7 @@ var PageRankView = Backbone.View.extend({
 
     template: _.template('<div class="status"><%= status %></div> <a href="<%= url %>" target="_blank"><%= url %></a> <div class="buttons"><button type="button" class="refresh btn btn-success">Refresh</button> <button type="button" class="delete btn btn-danger">&times;</button></div>'),
 
-    render: function () {
+    render: function() {
         this.$el.html(this.template({
             status: this.getStatus(),
             url: this.model.get('id')
@@ -36,7 +36,7 @@ var PageRankView = Backbone.View.extend({
     },
 
 
-    getStatus: function () {
+    getStatus: function() {
         var pr = this.model.get('pagerank');
         if (pr === undefined) {
             return "Unknown";
@@ -52,47 +52,47 @@ var PageRankView = Backbone.View.extend({
     loadingTemplate: '<div class="progress progress-striped active"><div class="bar" style="width: 100%;"></div></div>',
     pendingTemplate: '<div class="progress progress-striped"><div class="bar" style="width: 100%;"></div></div>',
 
-    setStatus: function (status) {
+    setStatus: function(status) {
 
         this.$('.status').html(status);
     },
 
-    request: function () {
+    request: function() {
         this.setStatus(this.loadingTemplate);
         //this.$el.addClass('loading');
     },
 
-    sync: function () {
+    sync: function() {
         //this.$el.removeClass('loading');
         this.render();
     },
 
-    error: function (model, response) {
+    error: function(model, response) {
         this.setStatus(response && response.status == 403 ? this.loadingTemplate : 'Error');
     },
 
-    flash: function (model, times) {
+    flash: function(model, times) {
         times = times || 1;
         var $el = this.$el;
         $el.addClass('flash');
-        _.delay(function () {
+        _.delay(function() {
             $el.removeClass('flash');
         }, times * 1000);
     },
 
-    refresh: function () {
+    refresh: function() {
         this.model.fetch();
     },
 
-    pending: function () {
+    pending: function() {
         this.setStatus(this.pendingTemplate);
     },
 
-    preLoad: function () {
+    preLoad: function() {
         this.setStatus(this.loadingTemplate);
     },
 
-    destroy: function () {
+    destroy: function() {
         // we don't want to actually destroy the model, just remove it from the collection 
         // (and hand it over to the 'undo' view)
         this.model.collection.remove(this.model.get('id'));

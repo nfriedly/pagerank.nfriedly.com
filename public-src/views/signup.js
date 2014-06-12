@@ -11,7 +11,7 @@ var SignupView = Backbone.View.extend({
         'click #paygo-signup': 'paygoSignup'
     },
     delayed_url: undefined,
-    buyReset: function () {
+    buyReset: function() {
         StripeCheckout.open({
             key: config.STRIPE_KEY,
             address: false,
@@ -24,18 +24,18 @@ var SignupView = Backbone.View.extend({
         this.trigger('purchase-click', this.PLAN_RESET);
         return false;
     },
-    paygoSignup: function () {
+    paygoSignup: function() {
         this.trigger('purchase-click', this.PLAN_PAYGO);
         alert('Thanks for your interest, this option will be avaliable soon!\nIn the meanwhile, please try out the 10 for $2 option');
         return false;
     },
-    handleStripeToken: function (plan, stripe_res) {
+    handleStripeToken: function(plan, stripe_res) {
         $.post('/api/purchase/' + plan, stripe_res)
             .done(_.bind(this.handleProvision, this, plan))
             .fail(_.bind(this.handleProvisionError, this));
         this.trigger('purchase', plan);
     },
-    handleProvision: function (plan, res) {
+    handleProvision: function(plan, res) {
         this.sendMessage({
             cmd: 'purchase',
             plan: plan,
@@ -43,7 +43,7 @@ var SignupView = Backbone.View.extend({
         });
         this.trigger('purchase-complete', plan);
     },
-    handleProvisionError: function (xhr) {
+    handleProvisionError: function(xhr) {
         var data;
         try {
             data = JSON.parse(xhr.responseText);
@@ -57,11 +57,11 @@ var SignupView = Backbone.View.extend({
         alert(message);
         this.trigger('purchase-error', message);
     },
-    sendMessage: function (msg) {
+    sendMessage: function(msg) {
         // todo: check if I need to use JSON
         parent.postMessage(JSON.stringify(msg), config.SITE);
     },
-    handleMessage: function (msg) {
+    handleMessage: function(msg) {
         // global console:false
         // console.log('iframe message recieved', msg, JSON.parse(msg.data));
         if (msg.origin != config.SITE) return;

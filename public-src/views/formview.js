@@ -13,7 +13,7 @@ var FormView = Backbone.View.extend({
     },
     input: null,
 
-    initialize: function () {
+    initialize: function() {
         this.input = this.$('input');
         this.textarea = this.$('textarea');
 
@@ -24,13 +24,13 @@ var FormView = Backbone.View.extend({
         }
     },
 
-    handleLookupClick: function (event) {
+    handleLookupClick: function(event) {
         event.preventDefault();
         if (this.multiMode) this.lookupMultiple();
         else this.lookupSingle();
     },
 
-    lookupSingle: function () {
+    lookupSingle: function() {
         var id = this.input.val();
         if (!id) return alert('Please enter a URL first.');
         this.lookup(id);
@@ -39,20 +39,20 @@ var FormView = Backbone.View.extend({
     },
 
     trimRegex: /^\s+|\s+$/g,
-    trim: function (string) {
+    trim: function(string) {
         return string.replace(/^\s+|\s+$/g, "");
     },
 
     lineRegex: /[\r\n]+/,
-    getUrls: function () {
+    getUrls: function() {
         var lines = this.textarea.val().split(this.lineRegex);
         return _.chain(lines).map(this.trim).compact().uniq().value();
     },
 
-    lookupMultiple: function () {
+    lookupMultiple: function() {
         var ids = this.getUrls();
         if (!ids.length) return alert('Please enter one or more URLs first.');
-        _.each(ids.reverse(), function (id) {
+        _.each(ids.reverse(), function(id) {
             this.lookup(id, true);
         }, this);
         this.trigger('lookup', 'Multi-line form', ids);
@@ -60,7 +60,7 @@ var FormView = Backbone.View.extend({
         this.collection.lookupPending();
     },
 
-    lookup: function (id, pending) {
+    lookup: function(id, pending) {
         var pr = this.collection.get(id);
         if (pr && pr.newish()) {
             pr.trigger('moveToTop', pr);
@@ -77,18 +77,18 @@ var FormView = Backbone.View.extend({
         }
     },
 
-    fetchOrPending: function (model, pending) {
+    fetchOrPending: function(model, pending) {
         if (pending) model.setPending(true);
         else model.fetch();
     },
 
-    toggleMultiMode: function (event) {
+    toggleMultiMode: function(event) {
         if (this.multiMode) this.disableMultiMode();
         else this.enableMultiMode();
         event.preventDefault();
     },
 
-    enableMultiMode: function () {
+    enableMultiMode: function() {
         this.multiMode = true;
         this.$('.single').slideUp();
         this.$('.multi').hide().slideDown();
@@ -111,7 +111,7 @@ var FormView = Backbone.View.extend({
         this.trigger('modeChange', 'multimode');
     },
 
-    disableMultiMode: function () {
+    disableMultiMode: function() {
         this.multiMode = false;
         this.trigger('modeChange', 'singlemode');
         this.$('.single').hide().slideDown();

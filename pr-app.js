@@ -1,7 +1,7 @@
 var PageRank = require('pagerank');
 var express = require('express');
 var connect = require('connect');
-var bodyParser = require('body-parser')
+var bodyParser = require('body-parser');
 var stripe = require('stripe')(process.env.STRIPE_PRIVATE_KEY);
 
 var cache = require('./cache');
@@ -20,7 +20,7 @@ if (env == 'production') {
 }
 
 function checkAuth(req, res, next) {
-    cache.checkIpAllowed(getIp(req), function (err, allowed, used) {
+    cache.checkIpAllowed(getIp(req), function(err, allowed, used) {
         res.setHeader('X-Free-Lookups-Used', used);
         if (!allowed) {
             return res.status(403).json({
@@ -63,13 +63,13 @@ function getPr(req, res) {
     }
     var url = decodeURIComponent(req.query.url);
 
-    cache.getPr(url, function (err, pagerank) {
+    cache.getPr(url, function(err, pagerank) {
         if (pagerank !== null) {
             res.setHeader('X-PR-Source', 'Cache');
             return sendResponse(null, res, url, pagerank);
         }
 
-        new PageRank(url, function (err, pr) {
+        new PageRank(url, function(err, pr) {
             res.setHeader('X-PR-Source', 'Live');
             sendResponse(err, res, url, pr);
             cache.setPr(url, pr);
@@ -77,31 +77,31 @@ function getPr(req, res) {
     });
 }
 
-app.get('/api/pagerank', checkAuth, function (req, res) {
+app.get('/api/pagerank', checkAuth, function(req, res) {
     res.setHeader('Cache-Control', 'no-cache');
     getPr(req, res, false);
 });
 
-app.get('/api/headers', function (req, res) {
+app.get('/api/headers', function(req, res) {
     req.headers.getIp = getIp(req);
     res.json(req.headers);
 });
 
-app.post('/api/purchase/reset', function (req, res) {
+app.post('/api/purchase/reset', function(req, res) {
     console.log(req.body);
     stripe.charges.create({
         amount: 200,
         currency: 'USD',
         card: req.body.id,
         description: 'PageRank Lookup Limit Reset'
-    }, function (err, stripe_response) {
+    }, function(err, stripe_response) {
         if (err) {
             return res.status(402).json({
                 paid: false,
                 error: err.message || err.name || 'Unknown error: ' + err.toString()
             });
         }
-        cache.resetIp(getIp(req), function (err) {
+        cache.resetIp(getIp(req), function(err) {
             if (err) {
                 try {
                     err = JSON.stringify(err);
@@ -118,13 +118,13 @@ app.post('/api/purchase/reset', function (req, res) {
     });
 });
 
-app.post('/api/purchase/paygo', function (req, res) {
+app.post('/api/purchase/paygo', function(req, res) {
     console.dir(req.body);
     var customer = stripe.customer.create({
         card: req.body.id,
         plan: "paygo",
         email: req.body.email
-    }, function (err, stripe_response) {
+    }, function(err, stripe_response) {
         console.dir(err, stripe_response);
         console.dir('customer', customer);
         // todo: create session
