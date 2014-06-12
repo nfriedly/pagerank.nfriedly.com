@@ -1,21 +1,23 @@
 var PageRank = require('pagerank');
 var express = require('express');
+var connect = require('connect');
+var bodyParser = require('body-parser')
 var stripe = require('stripe')(process.env.STRIPE_PRIVATE_KEY);
 
 var cache = require('./cache');
 
 var app = express();
 
-app.configure(function () {
-    app.use(express.static(__dirname + '/public'));
-    app.disable('x-powered-by');
-    app.use(express.bodyParser());
-});
+app.use(express.static(__dirname + '/public'));
+app.disable('x-powered-by');
+app.use(bodyParser.urlencoded());
 
-app.configure('production', function () {
+var env = process.env.NODE_ENV || 'development';
+
+if (env == 'production') {
     app.enable('trust proxy');
-    app.use(express.compress());
-});
+    app.use(connect.compress());
+}
 
 function checkAuth(req, res, next) {
     cache.checkIpAllowed(getIp(req), function (err, allowed, used) {
