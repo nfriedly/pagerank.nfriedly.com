@@ -43,8 +43,9 @@ input.btn-large {height:42px;}
 #payment-options > li { border-right: 2px solid black; padding-right: 14px; margin-right: 10px;}
 #payment-options > li:last-child {border: 0;}
 
-
-@media (max-width: 480px) { 
-#lookup-form .controls{margin-left:0;} 
-.jumbotron {padding: 3em 0;}
+@media (max-width: 767px) {
+body { padding: 0; }
+    #lookup-form .controls{margin-left:0;} 
+    .jumbotron {padding: 2em 0; margin: 20px 0;}
+    .container, navbar .container { margin: 0 20px; }
 }
