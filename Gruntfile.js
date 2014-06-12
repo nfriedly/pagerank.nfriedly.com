@@ -169,6 +169,7 @@ module.exports = function(grunt) {
                 stderr: true,
                 failOnError: true
             },
+            // this is so that the files will exist on heroku (signup.html in particular because it must load over ssl, and I don't want to deal with xdomain ajax). I could change it to generate them on demand, but that's a lot of work that I don't want to do.
             'git-commit-public': {
                 command: 'git commit public/ -m "committing public files for deployment: ' + (new Date()) + '"'
             },
