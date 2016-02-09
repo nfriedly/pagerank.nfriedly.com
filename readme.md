@@ -5,7 +5,7 @@ A simple tool to report the PageRank of a given site. Try an example at
 http://pagerank.nfriedly.com or host your own. 
 
 Plays nicely with most node.js 0.8+ environments, including heroku. Expects a 
-(REDISCLOUD_URL)[http://redis-cloud.com/] environment variable in the form of:
+[REDISCLOUD_URL](http://redis-cloud.com/) environment variable in the form of:
 
     redis://username:password@server:port
 
