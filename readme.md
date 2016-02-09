@@ -5,7 +5,7 @@ A simple tool to report the PageRank of a given site. Try an example at
 http://pagerank.nfriedly.com or host your own. 
 
 Plays nicely with most node.js 0.8+ environments, including heroku. Expects 
-(REDISCLOUD_URL)[rediscloud],  (STRIPE_PRIVATE_KEY)[stripe] environment variables. The 
+[REDISCLOUD_URL][rediscloud],  [STRIPE_PRIVATE_KEY][stripe] environment variables. The 
 `REDISCLOUD_URL` variable should be in the form of:
 
     redis://username:password@server:port
@@ -22,7 +22,7 @@ Todo:
 * Improve modal responsiveness
 * Redirect old pr app to new one
 * Consider adding a uservoice widget
-* Add pay-as-you-go plan & user accounts - https://www.mozilla.org/en-US/persona/
+* Add pay-as-you-go plan & user accounts
 * Hide add for paying users
 * Start recording historical values
 * Offer automatic daily/weekly/monthly refresh for paygo users
