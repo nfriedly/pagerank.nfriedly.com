@@ -15,29 +15,10 @@ Plays nicely with most node.js 0.8+ environments, including heroku. Expects
 
 You'll also need to edit public/config.js with your stripe public keys and site's domain.
 
-Todo:
------
+⚠️ No longer working ⚠️ 
+-----------------------
 
-* Fix grunt tasks for html and CSS auto-updating
-* Improve modal responsiveness
-* Redirect old pr app to new one
-* Consider adding a uservoice widget
-* Add pay-as-you-go plan & user accounts
-* Hide add for paying users
-* Start recording historical values
-* Offer automatic daily/weekly/monthly refresh for paygo users
-* Offer email on change for automatic refresh users
-* Add some cool icons (w/ font-awesome?)
-* Favicon.ico
-* Include fallbacks for external JS / CSS / etc
-* Fix html minification
-* auto beautify html
-* Add retry button to error dialog
-* Add no-js warning
-* Lots of unit tests
-* Add way to view historical values
-* Accept bitcoin
-* Internationalization
+Google turned off the API that this library used, so the library is no longer functional.
 
 
 GPLv3 License:
